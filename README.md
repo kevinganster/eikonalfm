@@ -4,6 +4,12 @@ eikonalfm is a Python (C++-)extension which implements the fast marching method 
 ```| grad tau(x) |^2 = 1 / c(x)^2.```
 
 
+# Requirements
+
+- Python 3
+- numpy version 1.7 or above
+
+
 # Installation
 
 Installation from PyPi:(TODO)  
