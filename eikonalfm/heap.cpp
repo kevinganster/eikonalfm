@@ -1,6 +1,5 @@
 #include <vector>
 #include <algorithm>
-#include <map>
 
 //#include <iostream>
 //using namespace std;
@@ -15,11 +14,6 @@ protected:
 	size_t* m;				// mapping from position to index in the container
 
 public:
-	Heap(const size_t max_size) :
-		Heap(std::less<size_t>, max_size)
-	{	// construct with default comparator
-	}
-
 	explicit Heap(const _Comp& _Comparator, const size_t max_size) :
 		c(), comp(_Comparator), m(new size_t[max_size])
 	{	// construct with specified comparator
