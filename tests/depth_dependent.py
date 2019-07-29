@@ -16,7 +16,7 @@ def c_func(x):
     return b + a * x[1]
 
 
-# procedures.test_single(((0, 8), (0, 4)), 321, c_func, tau_exact, x_s=(4, 0), order=2)
-# procedures.test_isochrones(((0, 8), (0, 4)), 321, c_func, tau_exact, x_s=(3, 0), x_r=(5, 0), order=2)
+procedures.test_single(((0, 8), (0, 4)), 321, c_func, tau_exact, x_s=(4, 0), order=2)
+procedures.test_isochrones(((0, 8), (0, 4)), 321, c_func, tau_exact, x_s=(3, 0), x_r=(5, 0), order=2)
 procedures.test_convergence(((0, 8), (0, 4)), (11, 21, 41, 81, 161, 321, 641, 1281, 2561), c_func, tau_exact, x_s=(4, 0), order=2)
 # procedures.test_convergence(((0, 8), (0, 4)), (321, 641, 1281, 2561, 5121, 10241), c_func, tau_exact, order=2)
