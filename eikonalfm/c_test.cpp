@@ -75,6 +75,6 @@ int main()
 	delete m;
 	delete[] tau;
 
-	//_CrtDumpMemoryLeaks();
+	_CrtDumpMemoryLeaks();
 	return 0;
 }

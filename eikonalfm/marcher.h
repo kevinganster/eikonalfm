@@ -9,6 +9,7 @@
 
 
 const double INF = std::numeric_limits<double>::infinity();
+const double N_INF = std::numeric_limits<double>::lowest();
 
 const char UNKNOWN = 0;
 const char KNOWN = 1;
@@ -43,8 +44,12 @@ protected:
 
 	virtual double solve_quadratic(const size_t x, double* const tau) const;
 
+	// storage containers for solve_quadratic
+	double* alpha_sq,* beta;
+	bool* skip;
+
 private:
-	// inverse squared grid-spacing in each dimension (dx^2)
+	// inverse squared grid-spacing in each dimension (dx^2), used in solve_quadratic
 	double* dx_sq_inv;
 
 	void initialize(const size_t x0, double* const tau);

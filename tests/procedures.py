@@ -15,24 +15,22 @@ def test_single(area, n, c_func, tau_exact, x_s=(0, 0), order=2):
     x_s = mesh.pos_to_index(np.array(x_s))
     # velocity
     c = c_func(mesh.X)
-    #np.savetxt("test.txt", c, fmt="%.2f", delimiter=", ", newline=",\n")
     
     tau = tau_exact(mesh.X, mesh.index_to_pos(x_s))
-    print("exact solution:")
-    print(np.array2string(tau.T, separator="    "))
     tau_fm = eikonalfm.fast_marching(c, x_s, mesh.dx, order)
     tau_ffm = eikonalfm.factored_fast_marching(c, x_s, mesh.dx, order)
-    print("finished solving")
-    print("ffm solution:")
-    print(np.array2string(tau_ffm.T, separator="    "))
 
-    print("error fast marching")
-    print("inf-norm", np.linalg.norm(tau_fm - tau, ord=np.inf))
-    print("2-norm", np.linalg.norm(tau_fm - tau, ord=2))
-    print()
-    print("error factored fast marching")
-    print("inf-norm", np.linalg.norm(tau_ffm - tau, ord=np.inf))
-    print("2-norm", np.linalg.norm(tau_ffm - tau, ord=2))
+#     print(np.array2string(tau_ffm.T, separator="    "))
+    
+    err_fm = (tau - tau_fm).flatten()
+    err_ffm = (tau - tau_ffm).flatten()
+
+    print("""Statistic:            fm    \t  ffm
+    l_inf error:    {:.2e},\t{:.2e}
+    mean l_2 error: {:.2e},\t{:.2e}""".format(
+            np.linalg.norm(err_fm, ord=np.inf), np.linalg.norm(err_ffm, ord=np.inf),
+            np.linalg.norm(err_fm, ord=2), np.linalg.norm(err_ffm, ord=2)
+        ))
     
     
     levels = 10
@@ -79,10 +77,6 @@ def test_single(area, n, c_func, tau_exact, x_s=(0, 0), order=2):
     plt.colorbar(plot, ax=ax)
       
     plt.show()
-
-    # phi = np.ones_like(c)
-    # phi[tuple(x_s)] = 0
-    # tau_skfmm = skfmm.travel_time(phi, c, dx=mesh.dx, order=2)
 
 
 def test_isochrones(area, n, c_func, tau_exact, x_s=(0, 0), x_r=(1, 0), order=2):
@@ -178,10 +172,10 @@ def test_convergence(area, n_list, c_func, tau_exact, x_s=(0, 0), order=2):
         data['ffm']['2'].append(mesh.dx[0] * np.linalg.norm(err, ord=2))
 
         print()
-        print("""Statistic:             fm     \t  ffm
-        l_inf error: {:.2e},\t{:.2e}
-        l_2 error:   {:.2e},\t{:.2e}
-        time:        {:.2f}s,\t{:.2f}s""".format(
+        print("""Statistic:            fm    \t  ffm
+    l_inf error:    {:.2e},\t{:.2e}
+    mean l_2 error: {:.2e},\t{:.2e}
+    time:           {:.2f}s,  \t{:.2f}s""".format(
             data['fm']['inf'][-1], data['ffm']['inf'][-1],
             data['fm']['2'][-1], data['ffm']['2'][-1],
             data['fm']['time'][-1], data['ffm']['time'][-1]
@@ -193,7 +187,7 @@ def test_convergence(area, n_list, c_func, tau_exact, x_s=(0, 0), order=2):
     ax.set_xlabel("h")
     ax.plot(h_list, data['fm']['inf'], label="inf-norm")
     ax.plot(h_list, data['fm']['2'], label="2-norm")
-    ax.set_xticks(h_list)
+#     ax.set_xticks(h_list)
     ax.legend()
 
     ax = plt.subplot(2, 3, 2)
@@ -201,16 +195,15 @@ def test_convergence(area, n_list, c_func, tau_exact, x_s=(0, 0), order=2):
     ax.set_xlabel("h")
     ax.plot(h_list, data['ffm']['inf'], label="inf-norm")
     ax.plot(h_list, data['ffm']['2'], label="2-norm")
-    ax.set_xticks(h_list)
+#     ax.set_xticks(h_list)
     ax.legend()
 
     ax = plt.subplot(2, 3, 3)
     ax.set_title("Time")
     ax.set_xlabel("n")
     ax.set_ylabel("sec")
-    ax.loglog(n_list, data['fm']['time'], label="fast marching")
-    ax.loglog(n_list, data['ffm']['time'], label="factored fast marching")
-#     ax.loglog(n_list, [1e-4 * n * np.log(n) for n in n_list], label="n log(n)")
+    ax.plot(n_list, data['fm']['time'], label="fast marching")
+    ax.plot(n_list, data['ffm']['time'], label="factored fast marching")
     ax.legend()
     
     
@@ -220,6 +213,7 @@ def test_convergence(area, n_list, c_func, tau_exact, x_s=(0, 0), order=2):
     ax.set_xlabel("h")
     ax.loglog(h_list, data['fm']['inf'], label="inf-norm")
     ax.loglog(h_list, data['fm']['2'], label="2-norm")
+    ax.loglog(h_list, [0.5 * h for h in h_list], label="O(h)")
     ax.legend()
 
     ax = plt.subplot(2, 3, 5)
@@ -227,6 +221,16 @@ def test_convergence(area, n_list, c_func, tau_exact, x_s=(0, 0), order=2):
     ax.set_xlabel("h")
     ax.loglog(h_list, data['ffm']['inf'], label="inf-norm")
     ax.loglog(h_list, data['ffm']['2'], label="2-norm")
+    ax.loglog(h_list, [1e-2 * h**1.5 for h in h_list], label=r"$O(h^\frac{3}{2})$")
+    ax.legend()
+    
+    ax = plt.subplot(2, 3, 6)
+    ax.set_title("Time")
+    ax.set_xlabel("n")
+    ax.set_ylabel("sec")
+    ax.loglog(n_list, data['fm']['time'], label="fast marching")
+    ax.loglog(n_list, data['ffm']['time'], label="factored fast marching")
+    ax.loglog(n_list, [1e-4 * n * np.log(n) for n in n_list], label="O(n log(n))")
     ax.legend()
     
     plt.show()

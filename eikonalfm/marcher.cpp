@@ -28,13 +28,21 @@ extern "C"
 		}
 
 		flags = new char[size];
+
+		alpha_sq = new double[ndim];
+		beta = new double[ndim];
+		skip = new bool[ndim];
 	}
 
 	Marcher::~Marcher()
 	{
-		delete[] dx_sq_inv;
 		delete[] shift;
 		delete[] flags;
+
+		delete[] dx_sq_inv;
+		delete[] alpha_sq;
+		delete[] beta;
+		delete[] skip;
 	}
 
 	void Marcher::initialize(const size_t x0, double* tau)
@@ -137,9 +145,6 @@ extern "C"
 
 	double Marcher::solve_quadratic(const size_t x, double* const tau) const
 	{
-		double a = 0.0, b = 0.0;
-		double c = -1 / pow(this->c[x], 2);
-
 		size_t rem = x;
 		for (int d = 0; d < ndim; d++)
 		{
@@ -166,31 +171,65 @@ extern "C"
 			// only include summands that are valid, skip the rest
 			if (direction != 0)
 			{
-				double alpha_d_sq, beta_d;
+				skip[d] = false;
+
 				// valid known second neighbor + second order condition -> use second order
 				if (order == 2 && ((direction == -1 && dim_i > 1) || (direction == 1 && dim_i < shape[d] - 2)) && flags[x + 2 * direction * shift[d]] == KNOWN
 					&& tau_n > tau[x + 2 * direction * shift[d]])
 				{
-					alpha_d_sq = nine_fourths;
-					beta_d = one_third * (4.0 * tau_n - tau[x + 2 * direction * shift[d]]);
+					alpha_sq[d] = nine_fourths * dx_sq_inv[d];
+					beta[d] = one_third * (4.0 * tau_n - tau[x + 2 * direction * shift[d]]);
 				}
 				// otherwise fall back to first order
 				else
 				{
-					alpha_d_sq = 1.0;
-					beta_d = tau_n;
+					alpha_sq[d] = dx_sq_inv[d];
+					beta[d] = tau_n;
 				}
-
-				a += dx_sq_inv[d] * alpha_d_sq;
-				b -= 2.0 * dx_sq_inv[d] * alpha_d_sq * beta_d;
-				c += dx_sq_inv[d] * alpha_d_sq * pow(beta_d, 2);
 			}
+			else
+				skip[d] = true;
 		}
 
-		double disc = pow(b, 2) - 4.0 * a * c;
 
-		if (disc < 0)
-			throw std::runtime_error("Negative discriminant in solve_quadratic.");
+		double c_base = -1.0 / pow(this->c[x], 2);
+		double a, b, c;
+		double disc;
+
+		// the currently biggest "beta" and it's dimension
+		double biggest;
+		int biggest_d;
+
+		do
+		{
+			a = 0.0, b = 0.0;
+			c = c_base;
+
+			biggest = N_INF;
+			biggest_d = -1;
+
+			for (int d = 0; d < ndim; d++)
+			{
+				if (!skip[d])
+				{
+					a += alpha_sq[d];
+					b -= 2.0 * alpha_sq[d] * beta[d];
+					c += alpha_sq[d] * pow(beta[d], 2);
+
+					if (beta[d] > biggest)
+					{
+						biggest_d = d;
+						biggest = beta[d];
+					}
+				}
+			}
+
+			if (biggest_d == -1)
+				throw std::runtime_error("Negative discriminant in solve_quadratic.");
+
+			disc = pow(b, 2) - 4.0 * a * c;
+			skip[biggest_d] = true;
+		} while (disc < 0);
 
 		// a is always positive, so the '+' solution is larger
 		return (-b + sqrt(disc)) / (2.0 * a);

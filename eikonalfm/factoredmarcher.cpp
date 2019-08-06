@@ -6,17 +6,7 @@
 
 FactoredMarcher::FactoredMarcher(const double* const c, const int ndim, const long* const shape, const double* const dx, const int order) :
 	Marcher(c, ndim, shape, dx, order)
-{ 
-	alpha_sq = new double[ndim];
-	beta = new double[ndim];
-	skip = new bool[ndim];
-}
-
-FactoredMarcher::~FactoredMarcher()
 {
-	delete[] alpha_sq;
-	delete[] beta;
-	delete[] skip;
 }
 
 const long* FactoredMarcher::to_vector(size_t i)
@@ -221,6 +211,9 @@ double FactoredMarcher::solve_quadratic(const double* const tau0, const double* 
 	double c_base = -1.0 / pow(this->c[x], 2);
 	double a, b, c;
 	double disc;
+
+	// the currently biggest "beta" and it's dimension
+	double biggest;
 	int biggest_d;
 
 	do
@@ -228,7 +221,7 @@ double FactoredMarcher::solve_quadratic(const double* const tau0, const double* 
 		a = 0.0, b = 0.0;
 		c = c_base;
 
-		double biggest = 0;
+		biggest = N_INF;
 		biggest_d = -1;
 
 		for (int d = 0; d < ndim; d++)

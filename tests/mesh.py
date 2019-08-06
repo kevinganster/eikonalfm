@@ -11,10 +11,13 @@ class Mesh2D:
             x1, dx1 = np.linspace(x1_range[0], x1_range[1], num=nx1, retstep=True)
             nx2 = int((x2_range[1] - x2_range[0]) / dx1) + 1
             x2, dx2 = np.linspace(x2_range[0], x2_range[1], num=nx2, retstep=True)
-        else:
+        elif nx1 is None:
             x2, dx2 = np.linspace(x2_range[0], x2_range[1], num=nx2, retstep=True)
             nx1 = int((x1_range[1] - x1_range[0]) / dx2) + 1
             x1, dx1 = np.linspace(x1_range[0], x1_range[1], num=nx1, retstep=True)
+        else:
+            x1, dx1 = np.linspace(x1_range[0], x1_range[1], num=nx1, retstep=True)
+            x2, dx2 = np.linspace(x2_range[0], x2_range[1], num=nx2, retstep=True)
 
         self.n = (nx1, nx2)
         self.dx = np.array([dx1, dx2])
