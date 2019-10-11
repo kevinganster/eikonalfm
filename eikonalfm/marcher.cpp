@@ -1,6 +1,7 @@
 #include <vector>
 #include <queue>
 #include <math.h>
+#include <stdexcept>
 #include "marcher.h"
 #include "heap.cpp"
 
@@ -45,7 +46,7 @@ extern "C"
 		delete[] skip;
 	}
 
-	void Marcher::initialize(const size_t x0, double* tau)
+	void Marcher::initialize(const size_t x_s, double* tau)
 	{
 		for (long i = 0; i < size; i++)
 		{
@@ -53,16 +54,16 @@ extern "C"
 			tau[i] = INF;
 		}
 
-		tau[x0] = 0;
+		tau[x_s] = 0;
 	}
 
-	void Marcher::solve(const size_t x0, double* const tau)
+	void Marcher::solve(const size_t x_s, double* const tau)
 	{
-		initialize(x0, tau);
+		initialize(x_s, tau);
 
 		auto heap_comp = [&tau](const size_t e1, const size_t e2){ return tau[e1] < tau[e2]; };
 		Heap<decltype(heap_comp)> front(heap_comp, size);
-		front.push(x0);
+		front.push(x_s);
 
 		// list of points with minimal tau-values for each while-iteration
 		std::vector<size_t> minima;
@@ -231,7 +232,7 @@ extern "C"
 			skip[biggest_d] = true;
 		} while (disc < 0);
 
-		// a is always positive, so the '+' solution is larger
+		// a is always positive, so the '+' solution is larger (causality)
 		return (-b + sqrt(disc)) / (2.0 * a);
 	}
 }

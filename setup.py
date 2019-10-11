@@ -3,7 +3,7 @@ import sys
 
 
 def readme():
-    with open("README.rst", "r") as f:
+    with open("README.md", "r") as f:
         return f.read()
 
 
@@ -24,19 +24,20 @@ def configuration(parent_package="", top_path=None):
 
 
 pkg_metadata = dict(
-    name             = "eikonal-fm",
-    version          = "2019.4.29",
-    description      = "An extension module implementing the (factored) fast marching method",
+    name             = "eikonalfm",
+    version          = "1.0.0",
+    description      = "solving the (factored) eikonal equation with the Fast Marching method",
     long_description = readme(),
-    url              = "https://github.com/", # TODO:
+    long_description_content_type = "text/markdown",
+    url              = "https://github.com/Daarknes/eikonalfm",
     author           = "Kevin Ganster",
     author_email     = "kevinganster@gmail.com",
     license          = "GPLv3",
-    keywords         = "fast marching method, eikonal equation",
+    keywords         = "Fast Marching method, factored Fast Marching method, eikonal equation, factored eikonal equation",
     configuration    = configuration,
     install_requires = ["numpy >= 1.7"],
-    classifiers      = [ "Development Status :: 4 - Beta",
-                         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    # "Development Status :: 4 - Beta",
+    classifiers      = [ "License :: OSI Approved :: MIT License",
                          "Operating System :: OS Independent",
                          "Topic :: Scientific/Engineering :: Mathematics",
                          "Programming Language :: C++",

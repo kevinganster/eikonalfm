@@ -13,6 +13,7 @@
 #endif
 
 #include <exception>
+#include <cstdio>
 #include "numpy/noprefix.h"
 #include "factoredmarcher.h"
 
@@ -20,70 +21,97 @@
 static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool factored)
 {
 	// define placeholders
-	PyObject* pc, * px0, * pdx;
+	PyObject* pc, * px_s, * pdx;
 	int order;
 
 	// parse arguments
-	if (!PyArg_ParseTuple(args, "OOOi", &pc, &px0, &pdx, &order))
+	if (!PyArg_ParseTuple(args, "OOOi", &pc, &px_s, &pdx, &order))
 		return NULL;
+
+	// only orders 1 and 2 are implemented
+	if (order < 1 || order > 2)
+	{
+		PyErr_SetString(PyExc_ValueError, "currently only orders 1 and 2 are supported.");
+		return NULL;
+	}
 
 	// convert python-numpy-array to c-numpy-array
 	PyArrayObject* c = (PyArrayObject*)PyArray_FROMANY(pc, NPY_DOUBLE, 1, 0, NPY_ARRAY_IN_ARRAY);
 	if (!c)
 	{
-		PyErr_SetString(PyExc_ValueError, "c must be an array of doubles");
+		PyErr_SetString(PyExc_ValueError, "c must be an array of doubles.");
 		return NULL;
 	}
 
 	int ndim = PyArray_NDIM(c);
 
 	// check if px0 is a python-numpy-array and if it has the correct size
-	PyArrayObject* x0_ = (PyArrayObject*)PyArray_FROMANY(px0, NPY_LONG, 1, 1, NPY_ARRAY_IN_ARRAY);
-	if (!x0_ || PyArray_SIZE(x0_) != ndim)
+	PyArrayObject* x_s_ = (PyArrayObject*)PyArray_FROMANY(px_s, NPY_LONG, 1, 1, NPY_ARRAY_IN_ARRAY);
+	if (!x_s_)
 	{
-		PyErr_SetString(PyExc_ValueError, "x0 must be an array of ints with size len(c.shape)");
+		PyErr_SetString(PyExc_ValueError, "x_s must be a 1D array of ints.");
+		Py_DECREF(c);
+		return NULL;
+	}
+	else if (PyArray_SIZE(x_s_) != ndim)
+	{
+		char msg[100];
+		std::sprintf(msg, "size of x_s and number of dimensions of c do not match: %d != %d.", PyArray_SIZE(x_s_), ndim);
+		PyErr_SetString(PyExc_ValueError, msg);
 		Py_DECREF(c);
 		return NULL;
 	}
 
 	// check if pdx is a python-numpy-array and if it has the correct size
 	PyArrayObject* dx_ = (PyArrayObject*)PyArray_FROMANY(pdx, NPY_DOUBLE, 1, 1, NPY_ARRAY_IN_ARRAY);
-	if (!dx_ || PyArray_SIZE(dx_) != ndim)
+	if (!dx_)
 	{
-		PyErr_SetString(PyExc_ValueError, "dx must be an array of doubles with size len(c.shape)");
+		PyErr_SetString(PyExc_ValueError, "dx must be a 1D array of doubles.");
 		Py_DECREF(c);
-		Py_DECREF(x0_);
+		Py_DECREF(x_s_);
+		return NULL;
+	}
+	else if (PyArray_SIZE(dx_) != ndim)
+	{
+		char msg[100];
+		std::sprintf(msg, "size of dx and number of dimensions of c do not match: %d != %d.", PyArray_SIZE(dx_), ndim);
+		PyErr_SetString(PyExc_ValueError, msg);
+		Py_DECREF(c);
 		return NULL;
 	}
 
 	double* dx = (double*)PyArray_DATA(dx_);
 	long* shape = new long[ndim];
 	// index version of x0_
-	size_t x0 = 0;
+	size_t x_s = 0;
 
-	long* x0_d = (long*)PyArray_DATA(x0_);
+	long* x_s_d = (long*)PyArray_DATA(x_s_);
 	size_t tmp = 1;
 	for (int i = ndim - 1; i >= 0; i--)
 	{
 		shape[i] = (long)PyArray_DIM(c, i);
 
-		if (x0_d[i] < 0 || x0_d[i] >= shape[i])
+		if (x_s_d[i] < 0 || x_s_d[i] >= shape[i])
 		{
-			PyErr_SetString(PyExc_IndexError, "values in x0 have to be within the shape of c");
+			char msg[128];
+			std::sprintf(msg, "entries of x_s have to be within the shape of c, but entry %d with value %d is not in [0, %d].", i, x_s_d[i], shape[i]-1);
+			PyErr_SetString(PyExc_ValueError, msg);
 			Py_DECREF(c);
-			Py_DECREF(x0_);
+			Py_DECREF(x_s_);
 			Py_DECREF(dx_);
 			delete[] shape;
 			return NULL;
 		}
-		x0 += tmp * x0_d[i];
+		x_s += tmp * x_s_d[i];
 		tmp *= shape[i];
 
 		if (dx[i] <= 0)
 		{
-			PyErr_SetString(PyExc_IndexError, "dx must be greater than zero");
+			char msg[128];
+			std::sprintf(msg, "entries of dx must be greater than zero, but entry %d with value %f is not.", i, dx[i]);
+			PyErr_SetString(PyExc_ValueError, msg);
 			Py_DECREF(c);
-			Py_DECREF(x0_);
+			Py_DECREF(x_s_);
 			Py_DECREF(dx_);
 			delete[] shape;
 			return NULL;
@@ -95,7 +123,7 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	if (!tau)
 	{
 		Py_DECREF(c);
-		Py_DECREF(x0_);
+		Py_DECREF(x_s_);
 		Py_DECREF(dx_);
 		delete[] shape;
 		return NULL;
@@ -110,14 +138,14 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 
 	try
 	{
-		m->solve(x0, (double*)PyArray_DATA(tau));
+		m->solve(x_s, (double*)PyArray_DATA(tau));
 	}
 	catch (const std::exception& ex)
 	{
 		// propagate error
 		PyErr_SetString(PyExc_RuntimeError, ex.what());
 		Py_XDECREF(c);
-		Py_XDECREF(x0_);
+		Py_XDECREF(x_s_);
 		Py_XDECREF(dx_);
 		delete m;
 		delete[] shape;

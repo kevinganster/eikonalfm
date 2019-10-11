@@ -1,5 +1,6 @@
 #include <vector>
 #include <math.h>
+#include <stdexcept>
 #include "factoredmarcher.h"
 #include "heap.cpp"
 
@@ -23,7 +24,7 @@ const long* FactoredMarcher::to_vector(size_t i)
 	return x;
 }
 
-void FactoredMarcher::initialize(double* const tau0, double* const tau1, const size_t x0, const long* const x0_v, double* const tau)
+void FactoredMarcher::initialize(double* const tau0, double* const tau1, const size_t x_s, const long* const x_s_v, double* const tau)
 {
 	// iterating vector (see below)
 	int* x = new int[ndim];
@@ -40,7 +41,7 @@ void FactoredMarcher::initialize(double* const tau0, double* const tau1, const s
 		double distance = 0;
 		for (int d = 0; d < ndim; d++)
 		{
-			distance += pow((x[d] - x0_v[d]) * dx[d], 2);
+			distance += pow((x[d] - x_s_v[d]) * dx[d], 2);
 		}
 
 		tau0[i] = sqrt(distance);
@@ -56,23 +57,23 @@ void FactoredMarcher::initialize(double* const tau0, double* const tau1, const s
 		}
 	}
 
-	tau1[x0] = 1.0 / c[x0];
-	tau[x0] = 0;
+	tau1[x_s] = 1.0 / c[x_s];
+	tau[x_s] = 0;
 
 	delete[] x;
 }
 
-void FactoredMarcher::solve(const size_t x0, double* const tau)
+void FactoredMarcher::solve(const size_t x_s, double* const tau)
 {
 	double* tau0 = new double[size];
 	double* tau1 = new double[size];
-	const long* const x0_v = to_vector(x0);
-	initialize(tau0, tau1, x0, x0_v, tau);
+	const long* const x_s_v = to_vector(x_s);
+	initialize(tau0, tau1, x_s, x_s_v, tau);
 
 
 	auto heap_comp = [&tau](const size_t e1, const size_t e2) { return tau[e1] < tau[e2]; };
 	Heap<decltype(heap_comp)> front(heap_comp, size);
-	front.push(x0);
+	front.push(x_s);
 
 	// list of points with minimal tau-values for each while-iteration
 	std::vector<size_t> minima;
@@ -117,7 +118,7 @@ void FactoredMarcher::solve(const size_t x0, double* const tau)
 				// valid neighbor to the 'left'
 				if (dim_i > 0 && flags[x_n] != KNOWN)
 				{
-					tau1[x_n] = solve_quadratic(tau0, tau1, x0_v, x_n, tau);
+					tau1[x_n] = solve_quadratic(tau0, tau1, x_s_v, x_n, tau);
 					tau[x_n] = tau0[x_n] * tau1[x_n];
 					// add neighbor to front-heap if it is not yet on it
 					if (flags[x_n] == UNKNOWN)
@@ -134,7 +135,7 @@ void FactoredMarcher::solve(const size_t x0, double* const tau)
 				// valid neighbor to the 'right'
 				if (dim_i < shape[d] - 1 && flags[x_n] != KNOWN)
 				{
-					tau1[x_n] = solve_quadratic(tau0, tau1, x0_v, x_n, tau);
+					tau1[x_n] = solve_quadratic(tau0, tau1, x_s_v, x_n, tau);
 					tau[x_n] = tau0[x_n] * tau1[x_n];
 					// add neighbor to front-heap if it is not yet on it
 					if (flags[x_n] == UNKNOWN)
@@ -152,10 +153,10 @@ void FactoredMarcher::solve(const size_t x0, double* const tau)
 
 	delete[] tau0;
 	delete[] tau1;
-	delete[] x0_v;
+	delete[] x_s_v;
 }
 
-double FactoredMarcher::solve_quadratic(const double* const tau0, const double* const tau1, const long* const x0, const size_t x, const double* const tau)
+double FactoredMarcher::solve_quadratic(const double* const tau0, const double* const tau1, const long* const x_s, const size_t x, const double* const tau)
 {
 	size_t rem = x;
 	for (int d = 0; d < ndim; d++)
@@ -190,13 +191,13 @@ double FactoredMarcher::solve_quadratic(const double* const tau0, const double* 
 			if (order == 2 && ((direction == -1 && dim_i > 1) || (direction == 1 && dim_i < shape[d] - 2)) && flags[x + 2 * direction * shift[d]] == KNOWN
 				&& tau_n > tau[x + 2 * direction * shift[d]])
 			{
-				alpha_d = 3.0 * tau0[x] / (2.0 * dx[d]) - direction * (dim_i - x0[d]) * dx[d] / tau0[x];
+				alpha_d = 3.0 * tau0[x] / (2.0 * dx[d]) - direction * (dim_i - x_s[d]) * dx[d] / tau0[x];
 				beta_d = tau0[x] * (4.0 * tau1[x + direction * shift[d]] - tau1[x + 2 * direction * shift[d]]) / (2 * dx[d] * alpha_d);
 			}
 			// otherwise fall back to first order
 			else
 			{
-				alpha_d = tau0[x] / dx[d] - direction * (dim_i - x0[d]) * dx[d] / tau0[x];
+				alpha_d = tau0[x] / dx[d] - direction * (dim_i - x_s[d]) * dx[d] / tau0[x];
 				beta_d = tau0[x] * tau1[x + direction * shift[d]] / (dx[d] * alpha_d);
 			}
 
