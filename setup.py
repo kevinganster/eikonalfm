@@ -25,7 +25,7 @@ def configuration(parent_package="", top_path=None):
 
 pkg_metadata = dict(
     name             = "eikonalfm",
-    version          = "1.0.0",
+    version          = "0.9.0",
     description      = "solving the (factored) eikonal equation with the Fast Marching method",
     long_description = readme(),
     long_description_content_type = "text/markdown",
