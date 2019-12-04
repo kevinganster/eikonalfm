@@ -94,7 +94,7 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 		if (x_s_d[i] < 0 || x_s_d[i] >= shape[i])
 		{
 			char msg[128];
-			std::sprintf(msg, "entries of x_s have to be within the shape of c, but entry %d with value %d is not in [0, %d].", i, x_s_d[i], shape[i]-1);
+			std::sprintf(msg, "entries of x_s have to be within the shape of c, but entry %d with value %ld is not in [0, %ld].", i, x_s_d[i], shape[i]-1);
 			PyErr_SetString(PyExc_ValueError, msg);
 			Py_DECREF(c);
 			Py_DECREF(x_s_);
@@ -176,8 +176,34 @@ static PyObject* factored_marching_wrapper(PyObject* self, PyObject* args)
 // 3) flags indicating whether or not keywords are accepted for this function, and 
 // 4) The docstring for the function.
 static PyMethodDef fm_methods[] = {
-	{"fast_marching", (PyCFunction)fast_marching_wrapper, METH_VARARGS, NULL},
-	{"factored_fast_marching", (PyCFunction)factored_marching_wrapper, METH_VARARGS, NULL},
+	{"fast_marching", (PyCFunction)fast_marching_wrapper, METH_VARARGS,
+        "fast_marching(c, x_s, dx, order)\n--\n\n"
+        "    Calculates the fast marching solution to the eikonal equation.\n\n"
+        "    Parameters\n"
+        "    ----------\n"
+        "    c : ndarray\n"
+        "        (background) velocity array, c(x) > 0.\n"
+        "    x_s : sequence of ints\n"
+        "        Source position as index vector, e.g. ``(0, 0)``. Must have the same length as the number of dimensions of c.\n"
+        "    dx : sequence of doubles\n"
+        "        Grid spacing for each dimension. Must have the same length as the number of dimensions of c.\n"
+        "    order : {1, 2}\n"
+        "        Order of the finite difference operators.\n"
+    },
+	{"factored_fast_marching", (PyCFunction)factored_marching_wrapper, METH_VARARGS,
+        "factored_fast_marching(c, x_s, dx, order)\n--\n\n"
+        "    Calculates the fast marching solution to the factored eikonal equation.\n\n"
+        "    Parameters\n"
+        "    ----------\n"
+        "    c : ndarray\n"
+        "        (background) velocity array, c(x) > 0.\n"
+        "    x_s : sequence of ints\n"
+        "        Source position as index vector, e.g. ``(0, 0)``. Must have the same length as the number of dimensions of c.\n"
+        "    dx : sequence of doubles\n"
+        "        Grid spacing for each dimension. Must have the same length as the number of dimensions of c.\n"
+        "    order : {1, 2}\n"
+        "        Order of the finite difference operators."
+    },
 
 	// Terminate the array with an object containing nulls.
 	{NULL, NULL, 0, NULL}

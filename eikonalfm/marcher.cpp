@@ -48,7 +48,7 @@ extern "C"
 
 	void Marcher::initialize(const size_t x_s, double* tau)
 	{
-		for (long i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			flags[i] = UNKNOWN;
 			tau[i] = INF;
