@@ -178,7 +178,8 @@ static PyObject* factored_marching_wrapper(PyObject* self, PyObject* args)
 static PyMethodDef fm_methods[] = {
 	{"fast_marching", (PyCFunction)fast_marching_wrapper, METH_VARARGS,
         "fast_marching(c, x_s, dx, order)\n--\n\n"
-        "    Calculates the fast marching solution to the eikonal equation.\n\n"
+        "    Calculates the fast marching solution to the eikonal equation.\n"
+        "\n"
         "    Parameters\n"
         "    ----------\n"
         "    c : ndarray\n"
@@ -189,7 +190,7 @@ static PyMethodDef fm_methods[] = {
         "        Grid spacing for each dimension, dx > 0. Must have the same length as the number of dimensions of c.\n"
         "    order : {1, 2}\n"
         "        Order of the finite difference operators.\n"
-        ""
+        "\n"
         "    Returns\n"
         "    ----------\n"
         "    tau : ndarray\n"
@@ -197,7 +198,8 @@ static PyMethodDef fm_methods[] = {
     },
 	{"factored_fast_marching", (PyCFunction)factored_marching_wrapper, METH_VARARGS,
         "factored_fast_marching(c, x_s, dx, order)\n--\n\n"
-        "    Calculates the fast marching solution to the factored eikonal equation.\n\n"
+        "    Calculates the fast marching solution to the factored eikonal equation.\n"
+        "\n"
         "    Parameters\n"
         "    ----------\n"
         "    c : ndarray\n"
@@ -207,8 +209,8 @@ static PyMethodDef fm_methods[] = {
         "    dx : sequence of doubles\n"
         "        Grid spacing for each dimension, dx > 0. Must have the same length as the number of dimensions of c.\n"
         "    order : {1, 2}\n"
-        "        Order of the finite difference operators."
-        ""
+        "        Order of the finite difference operators.\n"
+        "\n"
         "    Returns\n"
         "    ----------\n"
         "    tau : ndarray\n"

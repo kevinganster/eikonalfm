@@ -15,6 +15,7 @@ where <img src="https://latex.codecogs.com/svg.latex?\inline&space;\tau_0(x)=\lv
 
 - Python 3
 - numpy version 1.7 or higher
+- C++11 compiler
 
 
 # Installation

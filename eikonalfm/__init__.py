@@ -9,6 +9,6 @@ and the factored eikonal equation
 
 See https://github.com/Daarknes/eikonalfm for more information
 """
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 
 from .cfm import fast_marching, factored_fast_marching
