@@ -42,7 +42,7 @@ protected:
 	// flags for each grid-point
 	char* flags;
 
-	virtual double solve_quadratic(const size_t x, double* const tau) const;
+	double solve_quadratic(const size_t x, double* const tau) const;
 
 	// storage containers for solve_quadratic
 	double* alpha_sq,* beta;

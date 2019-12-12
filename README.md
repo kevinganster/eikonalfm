@@ -1,10 +1,10 @@
 # Eikonal Fast Marching
 
 eikonalfm is a Python (C++) extension which implements the Fast Marching method for the eikonal equation  
-```| grad(tau)(x) |^2 = 1 / c^2(x)```,  
+<p align="center"><img src="https://latex.codecogs.com/svg.latex?\lvert\nabla\tau(x)\rvert^2=\frac{1}{c^2(x)}," title="\lvert\nabla\tau(x)\rvert^2=\frac{1}{c^2(x)}," /></p>  
 and the factored eikonal equation  
-```| (tau0 grad(tau1) + tau1 grad(tau0))(x) |^2 = 1 / c^2(x)```,  
-where `tau0(x) = | x - x_s |`.
+<p align="center"><img src="https://latex.codecogs.com/svg.latex?\lvert(\tau_0\nabla\tau_1&plus;\tau_1\nabla\tau_0)(x)\rvert^2=\frac{1}{c^2(x)}," title="\lvert(\tau_0\nabla\tau_1+\tau_1\nabla\tau_0)(x)\rvert^2=\frac{1}{c^2(x)}," /></p>  
+where <img src="https://latex.codecogs.com/svg.latex?\tau_0(x)=\lvert&space;x-x_s\rvert" title="\tau_0(x)=\lvert x-x_s\rvert" />.
 
 ## References
 - J. Sethian. Fast marching methods. SIAM Review, 41(2):199-235, 1999. doi: 10.1137/S0036144598347059. URL https://doi.org/10.1137/S0036144598347059
@@ -14,7 +14,7 @@ where `tau0(x) = | x - x_s |`.
 # Requirements
 
 - Python 3
-- numpy version 1.7 or above
+- numpy version 1.7 or higher
 
 
 # Installation
@@ -39,8 +39,8 @@ import numpy as np
 import eikonalfm
 
 c = np.ones((100, 100))
-x_s = np.array([0, 0])
-dx = np.array([1.0, 1.0])
+x_s = (0, 0)
+dx = (1.0, 1.0)
 order = 2
 
 tau_fm = eikonalfm.fast_marching(c, x_s, dx, order)
@@ -48,3 +48,11 @@ tau_ffm = eikonalfm.factored_fast_marching(c, x_s, dx, order)
 ```
 
 Note that the source position `x_s` describes an index-vector.
+
+To visualize the results, matplotlib (https://pypi.org/project/matplotlib/) can be used, for example:  
+```
+import matplotlib.pyplot as plt
+
+plt.contourf(tau_ffm)
+plt.show()
+```

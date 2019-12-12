@@ -100,7 +100,7 @@ private:
 		return (i << 1) + 2;
 	}
 
-	void sift_down(size_t start)
+	void sift_down(const size_t start)
 	{
 		size_t s = size();
 		size_t i = start;
@@ -124,7 +124,7 @@ private:
 		}
 	}
 
-	void sift_up(size_t start)
+	void sift_up(const size_t start)
 	{
 		size_t i = start;
 		while (true)

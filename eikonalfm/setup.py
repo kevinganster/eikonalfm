@@ -1,5 +1,5 @@
 # we can safely import numpy here, sice it should be installed by now
-from setuptools import setup
+# from setuptools import setup
 from numpy.distutils.core import setup
 from numpy.distutils.misc_util import Configuration
 
@@ -11,7 +11,8 @@ def configuration(parent_package="", top_path=None):
                                    "marcher.cpp",
                                    "factoredmarcher.cpp",
                                    "heap.cpp"],
-                          include_dirs=['.'])
+                          include_dirs=['.'],
+                          extra_compile_args=["-std=c++11"]) # god damn it Mac OS
     return config
 
 

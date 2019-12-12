@@ -147,9 +147,9 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 		Py_XDECREF(c);
 		Py_XDECREF(x_s_);
 		Py_XDECREF(dx_);
+        Py_XDECREF(tau);
 		delete m;
 		delete[] shape;
-
 		return NULL;
 	}
 
@@ -186,9 +186,14 @@ static PyMethodDef fm_methods[] = {
         "    x_s : sequence of ints\n"
         "        Source position as index vector, e.g. ``(0, 0)``. Must have the same length as the number of dimensions of c.\n"
         "    dx : sequence of doubles\n"
-        "        Grid spacing for each dimension. Must have the same length as the number of dimensions of c.\n"
+        "        Grid spacing for each dimension, dx > 0. Must have the same length as the number of dimensions of c.\n"
         "    order : {1, 2}\n"
         "        Order of the finite difference operators.\n"
+        ""
+        "    Returns\n"
+        "    ----------\n"
+        "    tau : ndarray\n"
+        "        numerical solution tau for the eikonal equation.\n"
     },
 	{"factored_fast_marching", (PyCFunction)factored_marching_wrapper, METH_VARARGS,
         "factored_fast_marching(c, x_s, dx, order)\n--\n\n"
@@ -200,9 +205,18 @@ static PyMethodDef fm_methods[] = {
         "    x_s : sequence of ints\n"
         "        Source position as index vector, e.g. ``(0, 0)``. Must have the same length as the number of dimensions of c.\n"
         "    dx : sequence of doubles\n"
-        "        Grid spacing for each dimension. Must have the same length as the number of dimensions of c.\n"
+        "        Grid spacing for each dimension, dx > 0. Must have the same length as the number of dimensions of c.\n"
         "    order : {1, 2}\n"
         "        Order of the finite difference operators."
+        ""
+        "    Returns\n"
+        "    ----------\n"
+        "    tau : ndarray\n"
+        "        numerical solution tau for the eikonal equation.\n"
+//        "    tau0 : ndarray\n"
+//        "        distance from the source.\n"
+//        "    tau1 : ndarray\n"
+//        "        numerical solution tau1 for the factored eikonal equation.\n"
     },
 
 	// Terminate the array with an object containing nulls.

@@ -29,10 +29,10 @@ pkg_metadata = dict(
     description      = "solving the (factored) eikonal equation with the Fast Marching method",
     long_description = readme(),
     long_description_content_type = "text/markdown",
-    url              = "https://github.com/Daarknes/eikonalfm",
+    url              = "https://github.com/kevinganster/eikonalfm",
     author           = "Kevin Ganster",
     author_email     = "kevinganster@gmail.com",
-    license          = "GPLv3",
+    license          = "MIT",
     keywords         = "Fast Marching method, factored Fast Marching method, eikonal equation, factored eikonal equation",
     configuration    = configuration,
     install_requires = ["numpy >= 1.7"],
@@ -92,7 +92,7 @@ def parse_setuppy_commands():
 if __name__ == "__main__":
     if "--force" in sys.argv:
         run_build = True
-        sys.argv.remove('--force')
+        sys.argv.remove("--force")
     else:
         # Raise errors for unsupported commands, improve help output, etc.
         run_build = parse_setuppy_commands()
