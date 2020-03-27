@@ -27,7 +27,7 @@ pip install eikonalfm
 
 Manual install from the repository:  
 ```
-git clone https://github.com/Daarknes/eikonalfm.git
+git clone https://github.com/kevinganster/eikonalfm.git
 cd eikonalfm
 python setup.py
 ```
@@ -45,7 +45,7 @@ dx = (1.0, 1.0)
 order = 2
 
 tau_fm = eikonalfm.fast_marching(c, x_s, dx, order)
-tau_ffm = eikonalfm.factored_fast_marching(c, x_s, dx, order)
+tau1_ffm = eikonalfm.factored_fast_marching(c, x_s, dx, order)
 ```
 
 Note that the source position `x_s` describes an index-vector.
@@ -54,6 +54,8 @@ To visualize the results, matplotlib (https://pypi.org/project/matplotlib/) can 
 ```
 import matplotlib.pyplot as plt
 
-plt.contourf(tau_ffm)
+# for the distance-function 'x_s' describes real coordinates
+tau0 = eikonalfm.distance(tau1_ffm.shape, dx, x_s)
+plt.contourf(tau0 * tau1_ffm)
 plt.show()
 ```
