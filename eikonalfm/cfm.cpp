@@ -196,7 +196,7 @@ static PyMethodDef fm_methods[] = {
         "    Returns\n"
         "    ----------\n"
         "    tau : ndarray\n"
-        "        numerical solution tau for the eikonal equation.\n"
+        "        numerical solution tau for the eikonal equation."
     },
 	{"factored_fast_marching", (PyCFunction)factored_marching_wrapper, METH_VARARGS,
         "factored_fast_marching(c, x_s, dx, order)\n--\n\n"
@@ -216,7 +216,8 @@ static PyMethodDef fm_methods[] = {
         "    Returns\n"
         "    ----------\n"
         "    tau1 : ndarray\n"
-        "        numerical solution tau1 for the factored eikonal equation. To get tau, you need to multiply this with the distance field tau0.\n"
+        "        numerical solution tau1 for the factored eikonal equation.\n"
+        "        To get tau, you need to multiply this with the distance field tau0."
     },
 
 	// Terminate the array with an object containing nulls.

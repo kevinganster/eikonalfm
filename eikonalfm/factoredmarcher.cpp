@@ -14,7 +14,7 @@ FactoredMarcher::FactoredMarcher(const double* const c, const int ndim, const si
 
 const ptrdiff_t* FactoredMarcher::to_vector(size_t i)
 {
-    ptrdiff_t* x = new ptrdiff_t[ndim];
+    ptrdiff_t *x = new ptrdiff_t[ndim];
 	size_t rem = i;
 
 	for (int d = 0; d < ndim; d++)
@@ -29,7 +29,9 @@ const ptrdiff_t* FactoredMarcher::to_vector(size_t i)
 void FactoredMarcher::initialize(double* const tau0, double* const tau1, const size_t x_s, const ptrdiff_t* const x_s_v)
 {
 	// iterating vector (see below)
-    ptrdiff_t x[ndim] = {0};
+    ptrdiff_t *x = new ptrdiff_t[ndim];
+	for (int d = 0; d < ndim; d++)
+		x[d] = 0;
 
 	for (size_t i = 0; i < size; i++)
 	{
@@ -38,7 +40,7 @@ void FactoredMarcher::initialize(double* const tau0, double* const tau1, const s
 		double distance = 0;
 		for (int d = 0; d < ndim; d++)
 		{
-			distance += pow((x[d] - x_s_v[d]) * dx[d], 2);
+			distance += pow((double)((x[d] - x_s_v[d]) * dx[d]), 2);
 		}
 
 		tau0[i] = sqrt(distance);
@@ -54,6 +56,7 @@ void FactoredMarcher::initialize(double* const tau0, double* const tau1, const s
 		}
 	}
 
+	delete[] x;
 	tau1[x_s] = 1.0 / c[x_s];
 }
 
@@ -146,7 +149,7 @@ void FactoredMarcher::solve(const size_t x_s, double* const tau1)
 	delete[] x_s_v;
 }
 
-double FactoredMarcher::solve_quadratic(const double* const tau0, const double* const tau1, const long* const x_s, const size_t x)
+double FactoredMarcher::solve_quadratic(const double* const tau0, const double* const tau1, const ptrdiff_t *const x_s, const size_t x)
 {
 	size_t rem = x;
 	for (int d = 0; d < ndim; d++)
