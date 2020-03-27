@@ -1,11 +1,12 @@
 #pragma once
 
 #include <limits>
+#include <stddef.h>
 
 // memory leak detection
-#ifdef _DEBUG
-	#include "debugtests.h"
-#endif
+//#ifdef _DEBUG
+//	#include "debugtests.h"
+//#endif
 
 
 const double INF = std::numeric_limits<double>::infinity();
@@ -28,7 +29,7 @@ protected:
 	// number of dimensions (of c)
 	const int ndim;
 	// shape (of c)
-	const long* const shape;
+	const size_t* const shape;
 	// total number of grid points
 	size_t size;
 	// grid spacing (for each axis)
@@ -36,8 +37,8 @@ protected:
 	// order of the finite difference used
 	const int order;
 
-	// the shift to apply in every dimension to get a points neighbor
-	long* shift;
+	// the shift to apply in every dimension to get a points neighbor (ptrdiff_t since we sometimes multiply this with -1)
+	ptrdiff_t* shift;
 
 	// flags for each grid-point
 	char* flags;
@@ -55,7 +56,7 @@ private:
 	void initialize(const size_t x0, double* const tau);
 
 public:
-	Marcher(const double* const c, const int ndim, const long* const shape, const double* const dx, const int order);
+	Marcher(const double* const c, const int ndim, const size_t* const shape, const double* const dx, const int order);
 
 	virtual ~Marcher();
 

@@ -1,10 +1,10 @@
 // memory leak detection
-#include "debugtests.h"
+//#include "debugtests.h"
 
 #include "factoredmarcher.h"
 #include <iostream>
 #include <iomanip>
-#include <errcode.h>
+//#include <errcode.h>
 #include "heap.cpp"
 
 using namespace std;
@@ -14,18 +14,26 @@ int main()
 {
 	int ndim = 2;
 	size_t size = 11 * 6;
-	long* shape = new long[ndim] { 6, 11 };
+	size_t* shape = new size_t[ndim] { 6, 11 };
 	double* dx = new double[ndim]{ 0.8, 0.8 };
 	int order = 2;
 
-	double c_[] = {
+	/*double c_[] = {
 		0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
 		1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3,
 		2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1,
 		2.9, 2.9, 2.9, 2.9, 2.9, 2.9, 2.9, 2.9, 2.9, 2.9, 2.9,
 		3.7, 3.7, 3.7, 3.7, 3.7, 3.7, 3.7, 3.7, 3.7, 3.7, 3.7,
 		4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5
-	};
+	};*/
+	double c_[] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
 	double* c = (double*)&c_;
 	size_t x0 = 5;
 
@@ -74,6 +82,6 @@ int main()
 	delete m;
 	delete[] tau;
 
-	_CrtDumpMemoryLeaks();
+	//_CrtDumpMemoryLeaks();
 	return 0;
 }

@@ -5,14 +5,16 @@
 #include "heap.cpp"
 
 
-FactoredMarcher::FactoredMarcher(const double* const c, const int ndim, const long* const shape, const double* const dx, const int order) :
+#define tau(x) (tau0[x] * tau1[x])
+
+FactoredMarcher::FactoredMarcher(const double* const c, const int ndim, const size_t* const shape, const double* const dx, const int order) :
 	Marcher(c, ndim, shape, dx, order)
 {
 }
 
-const long* FactoredMarcher::to_vector(size_t i)
+const ptrdiff_t* FactoredMarcher::to_vector(size_t i)
 {
-	long* x = new long[ndim];
+    ptrdiff_t* x = new ptrdiff_t[ndim];
 	size_t rem = i;
 
 	for (int d = 0; d < ndim; d++)
@@ -24,19 +26,14 @@ const long* FactoredMarcher::to_vector(size_t i)
 	return x;
 }
 
-void FactoredMarcher::initialize(double* const tau0, double* const tau1, const size_t x_s, const long* const x_s_v, double* const tau)
+void FactoredMarcher::initialize(double* const tau0, double* const tau1, const size_t x_s, const ptrdiff_t* const x_s_v)
 {
 	// iterating vector (see below)
-	int* x = new int[ndim];
-	for (int d = 0; d < ndim; d++)
-	{
-		x[d] = 0;
-	}
+    ptrdiff_t x[ndim] = {0};
 
 	for (size_t i = 0; i < size; i++)
 	{
 		flags[i] = UNKNOWN;
-		tau[i] = INF;
 
 		double distance = 0;
 		for (int d = 0; d < ndim; d++)
@@ -50,7 +47,7 @@ void FactoredMarcher::initialize(double* const tau0, double* const tau1, const s
 		// increase vector-coordinates
 		for (int d = ndim - 1; d >= 0; d--)
 		{
-			if (++x[d] >= shape[d])
+			if (++x[d] >= (ptrdiff_t)shape[d])
 				x[d] = 0;
 			else
 				break;
@@ -58,20 +55,16 @@ void FactoredMarcher::initialize(double* const tau0, double* const tau1, const s
 	}
 
 	tau1[x_s] = 1.0 / c[x_s];
-	tau[x_s] = 0;
-
-	delete[] x;
 }
 
-void FactoredMarcher::solve(const size_t x_s, double* const tau)
+#include <iostream>
+void FactoredMarcher::solve(const size_t x_s, double* const tau1)
 {
 	double* tau0 = new double[size];
-	double* tau1 = new double[size];
-	const long* const x_s_v = to_vector(x_s);
-	initialize(tau0, tau1, x_s, x_s_v, tau);
+	const ptrdiff_t* const x_s_v = to_vector(x_s);
+	initialize(tau0, tau1, x_s, x_s_v);
 
-
-	auto heap_comp = [&tau](const size_t e1, const size_t e2) { return tau[e1] < tau[e2]; };
+	auto heap_comp = [&tau0, &tau1](const size_t e1, const size_t e2) { return tau(e1) < tau(e2); };
 	Heap<decltype(heap_comp)> front(heap_comp, size);
 	front.push(x_s);
 
@@ -87,14 +80,14 @@ void FactoredMarcher::solve(const size_t x_s, double* const tau)
 		minima.push_back(front.top());
 		// mark it as known
 		flags[front.top()] = KNOWN;
-		double value = tau[front.top()];
+		double value = tau(front.top());
 		// remove it from the heap
 		front.pop();
 
 		// append all points that have the same (minimal) tau-value -> front.push will get faster by this
 		while (true)
 		{
-			if (!front.empty() && tau[front.top()] == value)
+			if (!front.empty() && tau(front.top()) == value)
 			{
 				minima.push_back(front.top());
 				flags[front.top()] = KNOWN;
@@ -111,15 +104,14 @@ void FactoredMarcher::solve(const size_t x_s, double* const tau)
 			for (int d = 0; d < ndim; d++)
 			{
 				// index in the current axis
-				long dim_i = rem / shift[d];
+				size_t dim_i = rem / shift[d];
 				rem -= dim_i * shift[d];
 
 				size_t x_n = x_i - shift[d];
 				// valid neighbor to the 'left'
 				if (dim_i > 0 && flags[x_n] != KNOWN)
 				{
-					tau1[x_n] = solve_quadratic(tau0, tau1, x_s_v, x_n, tau);
-					tau[x_n] = tau0[x_n] * tau1[x_n];
+					tau1[x_n] = solve_quadratic(tau0, tau1, x_s_v, x_n);
 					// add neighbor to front-heap if it is not yet on it
 					if (flags[x_n] == UNKNOWN)
 					{
@@ -135,8 +127,7 @@ void FactoredMarcher::solve(const size_t x_s, double* const tau)
 				// valid neighbor to the 'right'
 				if (dim_i < shape[d] - 1 && flags[x_n] != KNOWN)
 				{
-					tau1[x_n] = solve_quadratic(tau0, tau1, x_s_v, x_n, tau);
-					tau[x_n] = tau0[x_n] * tau1[x_n];
+					tau1[x_n] = solve_quadratic(tau0, tau1, x_s_v, x_n);
 					// add neighbor to front-heap if it is not yet on it
 					if (flags[x_n] == UNKNOWN)
 					{
@@ -152,17 +143,16 @@ void FactoredMarcher::solve(const size_t x_s, double* const tau)
 	}
 
 	delete[] tau0;
-	delete[] tau1;
 	delete[] x_s_v;
 }
 
-double FactoredMarcher::solve_quadratic(const double* const tau0, const double* const tau1, const long* const x_s, const size_t x, const double* const tau)
+double FactoredMarcher::solve_quadratic(const double* const tau0, const double* const tau1, const long* const x_s, const size_t x)
 {
 	size_t rem = x;
 	for (int d = 0; d < ndim; d++)
 	{
 		// index in the current axis
-		long dim_i = rem / shift[d];
+		size_t dim_i = rem / shift[d];
 		rem -= dim_i * shift[d];
 
 		double tau_n = INF;
@@ -171,13 +161,13 @@ double FactoredMarcher::solve_quadratic(const double* const tau0, const double* 
 		// valid known neighbor to the 'left'
 		if (dim_i > 0 && flags[x - shift[d]] == KNOWN)
 		{
-			tau_n = tau[x - shift[d]];
+			tau_n = tau0[x - shift[d]] * tau1[x - shift[d]];
 			direction = -1;
 		}
 		// valid known neighbor to the 'right' (with smaller value)
-		if (dim_i < shape[d] - 1 && flags[x + shift[d]] == KNOWN && tau[x + shift[d]] < tau_n)
+		if (dim_i < shape[d] - 1 && flags[x + shift[d]] == KNOWN && tau(x + shift[d]) < tau_n)
 		{
-			tau_n = tau[x + shift[d]];
+			tau_n = tau(x + shift[d]);
 			direction = 1;
 		}
 
@@ -189,15 +179,15 @@ double FactoredMarcher::solve_quadratic(const double* const tau0, const double* 
 			double alpha_d, beta_d;
 			// valid known second neighbor + second order condition -> use second order
 			if (order == 2 && ((direction == -1 && dim_i > 1) || (direction == 1 && dim_i < shape[d] - 2)) && flags[x + 2 * direction * shift[d]] == KNOWN
-				&& tau_n > tau[x + 2 * direction * shift[d]])
+				&& tau_n > tau(x + 2 * direction * shift[d]))
 			{
-				alpha_d = 3.0 * tau0[x] / (2.0 * dx[d]) - direction * (dim_i - x_s[d]) * dx[d] / tau0[x];
+				alpha_d = 3.0 * tau0[x] / (2.0 * dx[d]) - direction * (ptrdiff_t)(dim_i - x_s[d]) * dx[d] / tau0[x];
 				beta_d = tau0[x] * (4.0 * tau1[x + direction * shift[d]] - tau1[x + 2 * direction * shift[d]]) / (2 * dx[d] * alpha_d);
 			}
 			// otherwise fall back to first order
 			else
 			{
-				alpha_d = tau0[x] / dx[d] - direction * (dim_i - x_s[d]) * dx[d] / tau0[x];
+				alpha_d = tau0[x] / dx[d] - direction * (ptrdiff_t)(dim_i - x_s[d]) * dx[d] / tau0[x];
 				beta_d = tau0[x] * tau1[x + direction * shift[d]] / (dx[d] * alpha_d);
 			}
 

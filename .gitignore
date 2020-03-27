@@ -17,5 +17,9 @@ build/
 .pydevproject
 .settings/
 
+#CLion
+.idea
+cmake-build-debug/
+
 #linux
 .directory

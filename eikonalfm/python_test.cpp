@@ -1,5 +1,5 @@
 // memory leak detection
-#include "debugtests.h"
+//#include "debugtests.h"
 
 #include <iostream>
 #include <iomanip>
@@ -15,7 +15,8 @@
 	#include <Python.h>
 #endif
 
-#include "numpy/noprefix.h"
+//#include "numpy/noprefix.h"
+#include "numpy/arrayobject.h"
 #include "factoredmarcher.h"
 
 using namespace std;
@@ -61,7 +62,7 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	}
 
 	double* dx = (double*)PyArray_DATA(dx_);
-	long* shape = new long[ndim];
+	size_t* shape = new size_t[ndim];
 	// index version of x0_
 	size_t x0 = 0;
 
@@ -123,23 +124,24 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 
 int main()
 {
-	Py_SetPath(Py_DecodeLocale("E:\\Anaconda\\Lib;E:\\Anaconda\\Lib\\site-packages;E:\\Anaconda\\DLLs", NULL));
+	//Py_SetPath(Py_DecodeLocale("E:\\Anaconda\\Lib;E:\\Anaconda\\Lib\\site-packages;E:\\Anaconda\\DLLs", NULL));
+    //Py_SetPath(Py_DecodeLocale("~\\anaconda3\\lib;~\\anaconda3\\lib\\python3.7\\site-packages;", NULL));
 	Py_Initialize();
 	import_array();
 
 
 	double c_[] = {
 		0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
-0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
+        0.50, 0.85, 1.20, 1.55, 1.90, 2.25, 2.60, 2.95, 3.30, 3.65, 4.00,
 	};
 
 	PyObject* args = PyTuple_New(4);
@@ -163,7 +165,7 @@ int main()
 	}
 
 	Py_Finalize();
-	_CrtDumpMemoryLeaks();
+	//_CrtDumpMemoryLeaks();
 
 	return 0;
 }

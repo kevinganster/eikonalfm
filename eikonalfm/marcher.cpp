@@ -9,7 +9,7 @@
 extern "C"
 {
 
-	Marcher::Marcher(const double* const c, const int ndim, const long* const shape, const double* const dx, const int order):
+	Marcher::Marcher(const double* const c, const int ndim, const size_t* const shape, const double* const dx, const int order):
 		c(c),
 		ndim(ndim),
 		shape(shape),
@@ -18,7 +18,7 @@ extern "C"
 	{
 		size = 1;
 		dx_sq_inv = new double[ndim];
-		shift = new long[ndim];
+		shift = new ptrdiff_t[ndim];
 
 		for (int i = ndim - 1; i >= 0; i--)
 		{
@@ -175,7 +175,7 @@ extern "C"
 				skip[d] = false;
 
 				// valid known second neighbor + second order condition -> use second order
-				if (order == 2 && ((direction == -1 && dim_i > 1) || (direction == 1 && dim_i < shape[d] - 2)) && flags[x + 2 * direction * shift[d]] == KNOWN
+				if (order >= 2 && ((direction == -1 && dim_i > 1) || (direction == 1 && dim_i < shape[d] - 2)) && flags[x + 2 * direction * shift[d]] == KNOWN
 					&& tau_n > tau[x + 2 * direction * shift[d]])
 				{
 					alpha_sq[d] = nine_fourths * dx_sq_inv[d];

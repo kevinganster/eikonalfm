@@ -15,6 +15,7 @@
 #include <exception>
 #include <cstdio>
 #include "numpy/noprefix.h"
+// maybe #include "numpy/arrayobject.h" instead?
 #include "factoredmarcher.h"
 
 
@@ -56,7 +57,7 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	else if (PyArray_SIZE(x_s_) != ndim)
 	{
 		char msg[100];
-		std::sprintf(msg, "size of x_s and number of dimensions of c do not match: %d != %d.", PyArray_SIZE(x_s_), ndim);
+		std::sprintf(msg, "size of x_s and number of dimensions of c do not match: %ld != %d.", PyArray_SIZE(x_s_), ndim);
 		PyErr_SetString(PyExc_ValueError, msg);
 		Py_DECREF(c);
 		return NULL;
@@ -74,22 +75,23 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	else if (PyArray_SIZE(dx_) != ndim)
 	{
 		char msg[100];
-		std::sprintf(msg, "size of dx and number of dimensions of c do not match: %d != %d.", PyArray_SIZE(dx_), ndim);
+		std::sprintf(msg, "size of dx and number of dimensions of c do not match: %ld != %d.", PyArray_SIZE(dx_), ndim);
 		PyErr_SetString(PyExc_ValueError, msg);
 		Py_DECREF(c);
+        Py_DECREF(x_s_);
 		return NULL;
 	}
 
 	double* dx = (double*)PyArray_DATA(dx_);
-	long* shape = new long[ndim];
+	size_t* shape = new size_t[ndim];
 	// index version of x0_
 	size_t x_s = 0;
 
-	long* x_s_d = (long*)PyArray_DATA(x_s_);
+	size_t* x_s_d = (size_t*)PyArray_DATA(x_s_);
 	size_t tmp = 1;
 	for (int i = ndim - 1; i >= 0; i--)
 	{
-		shape[i] = (long)PyArray_DIM(c, i);
+		shape[i] = PyArray_DIM(c, i);
 
 		if (x_s_d[i] < 0 || x_s_d[i] >= shape[i])
 		{
@@ -211,12 +213,8 @@ static PyMethodDef fm_methods[] = {
         ""
         "    Returns\n"
         "    ----------\n"
-        "    tau : ndarray\n"
-        "        numerical solution tau for the eikonal equation.\n"
-//        "    tau0 : ndarray\n"
-//        "        distance from the source.\n"
-//        "    tau1 : ndarray\n"
-//        "        numerical solution tau1 for the factored eikonal equation.\n"
+        "    tau1 : ndarray\n"
+        "        numerical solution tau1 for the factored eikonal equation. To get tau, you need to multiply this with the distance field tau0.\n"
     },
 
 	// Terminate the array with an object containing nulls.
