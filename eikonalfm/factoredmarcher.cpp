@@ -1,7 +1,7 @@
 #include <vector>
 #include <math.h>
 #include <stdexcept>
-#include "factoredmarcher.h"
+#include "factoredmarcher.hpp"
 #include "heap.cpp"
 
 

@@ -17,7 +17,7 @@
 
 //#include "numpy/noprefix.h"
 #include "numpy/arrayobject.h"
-#include "factoredmarcher.h"
+#include "factoredmarcher.hpp"
 
 using namespace std;
 

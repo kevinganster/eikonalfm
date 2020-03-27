@@ -1,7 +1,7 @@
 // memory leak detection
 //#include "debugtests.h"
 
-#include "factoredmarcher.h"
+#include "factoredmarcher.hpp"
 #include <iostream>
 #include <iomanip>
 //#include <errcode.h>

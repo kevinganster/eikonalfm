@@ -2,7 +2,7 @@
 #include <queue>
 #include <math.h>
 #include <stdexcept>
-#include "marcher.h"
+#include "marcher.hpp"
 #include "heap.cpp"
 
 // we don't want the function names to get 'mangled' by the compiler
@@ -102,7 +102,7 @@ extern "C"
 				for (int d = 0; d < ndim; d++)
 				{
 					// index in the current axis
-					long dim_i = rem / shift[d];
+					size_t dim_i = rem / shift[d];
 					rem -= dim_i * shift[d];
 
 					size_t x_n = x_i - shift[d];
@@ -150,7 +150,7 @@ extern "C"
 		for (int d = 0; d < ndim; d++)
 		{
 			// index in the current axis
-			long dim_i = rem / shift[d];
+			size_t dim_i = rem / shift[d];
 			rem -= dim_i * shift[d];
 
 			double tau_n = INF;

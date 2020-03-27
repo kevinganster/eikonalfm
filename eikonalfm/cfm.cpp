@@ -16,7 +16,7 @@
 #include <cstdio>
 #include "numpy/noprefix.h"
 // maybe #include "numpy/arrayobject.h" instead?
-#include "factoredmarcher.h"
+#include "factoredmarcher.hpp"
 
 
 static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool factored)
