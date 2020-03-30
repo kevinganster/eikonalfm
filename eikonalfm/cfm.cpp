@@ -19,6 +19,9 @@
 #include "factoredmarcher.hpp"
 
 
+// we don't want the function names to get 'mangled' by the compiler
+extern "C"
+{
 static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool factored)
 {
 	// define placeholders
@@ -242,4 +245,5 @@ PyMODINIT_FUNC PyInit_cfm(void)
 
 	import_array();
 	return m;
+}
 }

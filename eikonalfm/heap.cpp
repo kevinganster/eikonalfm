@@ -1,7 +1,7 @@
 // memory leak detection
-#ifdef _DEBUG
-	#include "debugtests.h"
-#endif
+//#ifdef _DEBUG
+//	#include "debugtests.h"
+//#endif
 
 #include <vector>
 #include <algorithm>

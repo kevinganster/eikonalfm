@@ -12,6 +12,7 @@ def configuration(parent_package="", top_path=None):
                                    "factoredmarcher.cpp",
                                    "heap.cpp"],
                           include_dirs=['.'],
+                          language="c++",
                           extra_compile_args=["-std=c++11"]) # god damn it Mac OS
     return config
 

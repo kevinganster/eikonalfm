@@ -23,9 +23,11 @@ def configuration(parent_package="", top_path=None):
     return config
 
 
+#from distutils.command.sdist import sdist
+
 pkg_metadata = dict(
     name             = "eikonalfm",
-    version          = "0.9.2",
+    version          = "0.9.3",
     description      = "solving the (factored) eikonal equation with the Fast Marching method",
     long_description = readme(),
     long_description_content_type = "text/markdown",
@@ -41,7 +43,8 @@ pkg_metadata = dict(
                          "Operating System :: OS Independent",
                          "Topic :: Scientific/Engineering :: Mathematics",
                          "Programming Language :: C++",
-                         "Programming Language :: Python :: 3"]
+                         "Programming Language :: Python :: 3"],
+#    cmdclass={"sdist": sdist}
 )
 
 
@@ -86,7 +89,6 @@ def parse_setuppy_commands():
         return True
 
     return False
-
 
 
 if __name__ == "__main__":

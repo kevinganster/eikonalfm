@@ -16,9 +16,6 @@ const char UNKNOWN = 0;
 const char KNOWN = 1;
 const char FRONT = 2;
 
-// we don't want the function names to get 'mangled' by the compiler
-extern "C"
-{
 
 class Marcher
 {
@@ -63,5 +60,3 @@ public:
 	// virtual in the base class tells the compiler to do a late bind (see http://www.willemer.de/informatik/cpp/cppvirt.htm)
 	virtual void solve(const size_t x0, double* const tau);
 };
-
-}
