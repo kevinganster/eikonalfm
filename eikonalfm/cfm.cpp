@@ -22,10 +22,10 @@
 // we don't want the function names to get 'mangled' by the compiler
 extern "C"
 {
-static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool factored)
+static PyObject* fast_marching_(PyObject *self, PyObject *args, const bool factored)
 {
 	// define placeholders
-	PyObject* pc, * px_s, * pdx;
+	PyObject *pc, *px_s, *pdx;
 	int order;
 
 	// parse arguments
@@ -35,12 +35,12 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	// only orders 1 and 2 are implemented
 	if (order < 1 || order > 2)
 	{
-		PyErr_SetString(PyExc_ValueError, "currently only orders 1 and 2 are supported.");
+		PyErr_SetString(PyExc_ValueError, "Only orders 1 and 2 are supported.");
 		return NULL;
 	}
 
 	// convert python-numpy-array to c-numpy-array
-	PyArrayObject* c = (PyArrayObject*)PyArray_FROMANY(pc, NPY_DOUBLE, 1, 0, NPY_ARRAY_IN_ARRAY);
+	PyArrayObject *c = (PyArrayObject*)PyArray_FROMANY(pc, NPY_DOUBLE, 1, 0, NPY_ARRAY_IN_ARRAY);
 	if (!c)
 	{
 		PyErr_SetString(PyExc_ValueError, "c must be an array of doubles.");
@@ -50,7 +50,7 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	int ndim = PyArray_NDIM(c);
 
 	// check if px0 is a python-numpy-array and if it has the correct size
-	PyArrayObject* x_s_ = (PyArrayObject*)PyArray_FROMANY(px_s, NPY_LONG, 1, 1, NPY_ARRAY_IN_ARRAY);
+	PyArrayObject *x_s_ = (PyArrayObject *)PyArray_FROMANY(px_s, NPY_ULONGLONG, 1, 1, NPY_ARRAY_IN_ARRAY);
 	if (!x_s_)
 	{
 		PyErr_SetString(PyExc_ValueError, "x_s must be a 1D array of ints.");
@@ -63,11 +63,12 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 		std::sprintf(msg, "size of x_s and number of dimensions of c do not match: %ld != %d.", PyArray_SIZE(x_s_), ndim);
 		PyErr_SetString(PyExc_ValueError, msg);
 		Py_DECREF(c);
+		Py_DECREF(x_s_);
 		return NULL;
 	}
 
 	// check if pdx is a python-numpy-array and if it has the correct size
-	PyArrayObject* dx_ = (PyArrayObject*)PyArray_FROMANY(pdx, NPY_DOUBLE, 1, 1, NPY_ARRAY_IN_ARRAY);
+	PyArrayObject *dx_ = (PyArrayObject *)PyArray_FROMANY(pdx, NPY_DOUBLE, 1, 1, NPY_ARRAY_IN_ARRAY);
 	if (!dx_)
 	{
 		PyErr_SetString(PyExc_ValueError, "dx must be a 1D array of doubles.");
@@ -85,12 +86,12 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 		return NULL;
 	}
 
-	double* dx = (double*)PyArray_DATA(dx_);
-	size_t* shape = new size_t[ndim];
+	double *dx = (double *)PyArray_DATA(dx_);
+	size_t *shape = new size_t[ndim];
 	// index version of x0_
 	size_t x_s = 0;
 
-	size_t* x_s_d = (size_t*)PyArray_DATA(x_s_);
+	size_t *x_s_d = (size_t *)PyArray_DATA(x_s_);
 	size_t tmp = 1;
 	for (int i = ndim - 1; i >= 0; i--)
 	{
@@ -124,7 +125,7 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	}
 
 	// create a new array for the return value
-	PyArrayObject* tau = (PyArrayObject*)PyArray_ZEROS(ndim, PyArray_DIMS(c), NPY_DOUBLE, 0);
+	PyArrayObject *tau = (PyArrayObject *)PyArray_ZEROS(ndim, PyArray_DIMS(c), NPY_DOUBLE, 0);
 	if (!tau)
 	{
 		Py_DECREF(c);
@@ -161,15 +162,15 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	delete m;
 	delete[] shape;
 
-	return (PyObject*)tau;
+	return (PyObject *)tau;
 }
 
-static PyObject* fast_marching_wrapper(PyObject* self, PyObject* args)
+static PyObject *fast_marching_wrapper(PyObject* self, PyObject* args)
 {
 	return fast_marching_(self, args, false);
 }
 
-static PyObject* factored_marching_wrapper(PyObject* self, PyObject* args)
+static PyObject *factored_marching_wrapper(PyObject* self, PyObject* args)
 {
 	return fast_marching_(self, args, true);
 }
