@@ -7,15 +7,15 @@
 
 #define tau(x) (tau0[x] * tau1[x])
 
-FactoredMarcher::FactoredMarcher(const double* const c, const int ndim, const size_t* const shape, const double* const dx, const int order) :
+FactoredMarcher::FactoredMarcher(const double* const c, const int ndim, const unsigned long *const shape, const double* const dx, const int order) :
 	Marcher(c, ndim, shape, dx, order)
 {
 }
 
-const ptrdiff_t* FactoredMarcher::to_vector(size_t i)
+const long *FactoredMarcher::to_vector(unsigned long i)
 {
-    ptrdiff_t *x = new ptrdiff_t[ndim];
-	size_t rem = i;
+    long *x = new long[ndim];
+    unsigned long rem = i;
 
 	for (int d = 0; d < ndim; d++)
 	{
@@ -26,14 +26,14 @@ const ptrdiff_t* FactoredMarcher::to_vector(size_t i)
 	return x;
 }
 
-void FactoredMarcher::initialize(double* const tau0, double* const tau1, const size_t x_s, const ptrdiff_t* const x_s_v)
+void FactoredMarcher::initialize(double *const tau0, double *const tau1, const unsigned long x_s, const long *const x_s_v)
 {
 	// iterating vector (see below)
-    ptrdiff_t *x = new ptrdiff_t[ndim];
+    unsigned long *x = new unsigned long[ndim];
 	for (int d = 0; d < ndim; d++)
 		x[d] = 0;
 
-	for (size_t i = 0; i < size; i++)
+	for (unsigned long i = 0; i < size; i++)
 	{
 		flags[i] = UNKNOWN;
 
@@ -49,7 +49,7 @@ void FactoredMarcher::initialize(double* const tau0, double* const tau1, const s
 		// increase vector-coordinates
 		for (int d = ndim - 1; d >= 0; d--)
 		{
-			if (++x[d] >= (ptrdiff_t)shape[d])
+			if (++x[d] >= shape[d])
 				x[d] = 0;
 			else
 				break;
@@ -61,18 +61,18 @@ void FactoredMarcher::initialize(double* const tau0, double* const tau1, const s
 }
 
 #include <iostream>
-void FactoredMarcher::solve(const size_t x_s, double* const tau1)
+void FactoredMarcher::solve(const unsigned long x_s, double *const tau1)
 {
-	double* tau0 = new double[size];
-	const ptrdiff_t* const x_s_v = to_vector(x_s);
+	double *tau0 = new double[size];
+	const long *const x_s_v = to_vector(x_s);
 	initialize(tau0, tau1, x_s, x_s_v);
 
-	auto heap_comp = [&tau0, &tau1](const size_t e1, const size_t e2) { return tau(e1) < tau(e2); };
+	auto heap_comp = [&tau0, &tau1](const unsigned long e1, const unsigned long e2) { return tau(e1) < tau(e2); };
 	Heap<decltype(heap_comp)> front(heap_comp, size);
 	front.push(x_s);
 
 	// list of points with minimal tau-values for each while-iteration
-	std::vector<size_t> minima;
+	std::vector<unsigned long> minima;
 
 	// main loop for fast marching
 	while (!front.empty())
@@ -100,17 +100,17 @@ void FactoredMarcher::solve(const size_t x_s, double* const tau1)
 				break;
 		}
 
-		for (size_t x_i : minima)
+		for (unsigned long x_i : minima)
 		{
 			// now we check all neighbors of x_i
-			size_t rem = x_i;
+            unsigned long rem = x_i;
 			for (int d = 0; d < ndim; d++)
 			{
 				// index in the current axis
-				size_t dim_i = rem / shift[d];
+                unsigned long dim_i = rem / shift[d];
 				rem -= dim_i * shift[d];
 
-				size_t x_n = x_i - shift[d];
+                unsigned long x_n = x_i - shift[d];
 				// valid neighbor to the 'left'
 				if (dim_i > 0 && flags[x_n] != KNOWN)
 				{
@@ -149,13 +149,13 @@ void FactoredMarcher::solve(const size_t x_s, double* const tau1)
 	delete[] x_s_v;
 }
 
-double FactoredMarcher::solve_quadratic(const double* const tau0, const double* const tau1, const ptrdiff_t *const x_s, const size_t x)
+double FactoredMarcher::solve_quadratic(const double *const tau0, const double *const tau1, const long *const x_s, const unsigned long x)
 {
-	size_t rem = x;
+    unsigned long rem = x;
 	for (int d = 0; d < ndim; d++)
 	{
 		// index in the current axis
-		size_t dim_i = rem / shift[d];
+        unsigned long dim_i = rem / shift[d];
 		rem -= dim_i * shift[d];
 
 		double tau_n = INF;
@@ -184,13 +184,13 @@ double FactoredMarcher::solve_quadratic(const double* const tau0, const double* 
 			if (order == 2 && ((direction == -1 && dim_i > 1) || (direction == 1 && dim_i < shape[d] - 2)) && flags[x + 2 * direction * shift[d]] == KNOWN
 				&& tau_n > tau(x + 2 * direction * shift[d]))
 			{
-				alpha_d = 3.0 * tau0[x] / (2.0 * dx[d]) - direction * (ptrdiff_t)(dim_i - x_s[d]) * dx[d] / tau0[x];
+				alpha_d = 3.0 * tau0[x] / (2.0 * dx[d]) - direction * (long)(dim_i - x_s[d]) * dx[d] / tau0[x];
 				beta_d = tau0[x] * (4.0 * tau1[x + direction * shift[d]] - tau1[x + 2 * direction * shift[d]]) / (2 * dx[d] * alpha_d);
 			}
 			// otherwise fall back to first order
 			else
 			{
-				alpha_d = tau0[x] / dx[d] - direction * (ptrdiff_t)(dim_i - x_s[d]) * dx[d] / tau0[x];
+				alpha_d = tau0[x] / dx[d] - direction * (long)(dim_i - x_s[d]) * dx[d] / tau0[x];
 				beta_d = tau0[x] * tau1[x + direction * shift[d]] / (dx[d] * alpha_d);
 			}
 

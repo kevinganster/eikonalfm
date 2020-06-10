@@ -18,11 +18,11 @@
 // maybe #include "numpy/arrayobject.h" instead?
 #include "factoredmarcher.hpp"
 
-
+#include <iostream>
 // we don't want the function names to get 'mangled' by the compiler
 extern "C"
 {
-static PyObject* fast_marching_(PyObject *self, PyObject *args, const bool factored)
+static PyObject* fast_marching_(PyObject *args, const bool factored)
 {
 	// define placeholders
 	PyObject *pc, *px_s, *pdx;
@@ -40,7 +40,7 @@ static PyObject* fast_marching_(PyObject *self, PyObject *args, const bool facto
 	}
 
 	// convert python-numpy-array to c-numpy-array
-	PyArrayObject *c = (PyArrayObject*)PyArray_FROMANY(pc, NPY_DOUBLE, 1, 0, NPY_ARRAY_IN_ARRAY);
+	PyArrayObject *c = (PyArrayObject *)PyArray_FROMANY(pc, NPY_DOUBLE, 1, 0, NPY_ARRAY_IN_ARRAY);
 	if (!c)
 	{
 		PyErr_SetString(PyExc_ValueError, "c must be an array of doubles.");
@@ -50,7 +50,7 @@ static PyObject* fast_marching_(PyObject *self, PyObject *args, const bool facto
 	int ndim = PyArray_NDIM(c);
 
 	// check if px0 is a python-numpy-array and if it has the correct size
-	PyArrayObject *x_s_ = (PyArrayObject *)PyArray_FROMANY(px_s, NPY_ULONGLONG, 1, 1, NPY_ARRAY_IN_ARRAY);
+	PyArrayObject *x_s_ = (PyArrayObject *)PyArray_FROMANY(px_s, NPY_LONG, 1, 1, NPY_ARRAY_IN_ARRAY);
 	if (!x_s_)
 	{
 		PyErr_SetString(PyExc_ValueError, "x_s must be a 1D array of ints.");
@@ -87,17 +87,18 @@ static PyObject* fast_marching_(PyObject *self, PyObject *args, const bool facto
 	}
 
 	double *dx = (double *)PyArray_DATA(dx_);
-	size_t *shape = new size_t[ndim];
+	// TODO: maybe change this to 'long', since x_s_d is of type 'long' anyways
+	unsigned long *shape = new unsigned long[ndim];
 	// index version of x0_
-	size_t x_s = 0;
+    unsigned long x_s = 0;
 
-	size_t *x_s_d = (size_t *)PyArray_DATA(x_s_);
-	size_t tmp = 1;
+    long *x_s_d = (long *)PyArray_DATA(x_s_);
+    unsigned long tmp = 1;
 	for (int i = ndim - 1; i >= 0; i--)
 	{
 		shape[i] = PyArray_DIM(c, i);
 
-		if (x_s_d[i] < 0 || x_s_d[i] >= shape[i])
+		if (x_s_d[i] < 0 || x_s_d[i] >= (long)shape[i])
 		{
 			char msg[128];
 			std::sprintf(msg, "entries of x_s have to be within the shape of c, but entry %d with value %ld is not in [0, %ld].", i, x_s_d[i], shape[i]-1);
@@ -137,14 +138,14 @@ static PyObject* fast_marching_(PyObject *self, PyObject *args, const bool facto
 
 	Marcher* m;
 	if (factored)
-		m = new FactoredMarcher((double*)PyArray_DATA(c), ndim, shape, dx, order);
+		m = new FactoredMarcher((double *)PyArray_DATA(c), ndim, shape, dx, order);
 	else
-		m = new Marcher((double*)PyArray_DATA(c), ndim, shape, dx, order);
+		m = new Marcher((double *)PyArray_DATA(c), ndim, shape, dx, order);
 
 
 	try
 	{
-		m->solve(x_s, (double*)PyArray_DATA(tau));
+		m->solve(x_s, (double *)PyArray_DATA(tau));
 	}
 	catch (const std::exception& ex)
 	{
@@ -167,12 +168,12 @@ static PyObject* fast_marching_(PyObject *self, PyObject *args, const bool facto
 
 static PyObject *fast_marching_wrapper(PyObject* self, PyObject* args)
 {
-	return fast_marching_(self, args, false);
+	return fast_marching_(args, false);
 }
 
 static PyObject *factored_marching_wrapper(PyObject* self, PyObject* args)
 {
-	return fast_marching_(self, args, true);
+	return fast_marching_(args, true);
 }
 
 

@@ -14,13 +14,13 @@ template<typename _Comp>
 class Heap
 {
 protected:
-	std::vector<size_t> c;	// underlying container
-	_Comp comp;				// comparator functor
-	size_t* m;				// mapping from position to index in the container
+	std::vector<unsigned long> c;	// underlying container
+	_Comp comp;				        // comparator functor
+    unsigned long *m;				// mapping from position to index in the container
 
 public:
-	explicit Heap(const _Comp& _Comparator, const size_t max_size) :
-		c(), comp(_Comparator), m(new size_t[max_size])
+	explicit Heap(const _Comp& _Comparator, const unsigned long max_size) :
+		c(), comp(_Comparator), m(new unsigned long[max_size])
 	{	// construct with specified comparator
 	}
 
@@ -34,17 +34,17 @@ public:
 		return c.empty();
 	}
 
-	size_t size() const
+    unsigned long size() const
 	{	// return length of queue
 		return c.size();
 	}
 
-	size_t top() const
+    unsigned long top() const
 	{
 		return c.front();
 	}
 
-	void push(const size_t item)
+	void push(const unsigned long item)
 	{
 		// append to the end of the container
 		c.push_back(item);
@@ -64,9 +64,9 @@ public:
 		sift_down(0);
 	}
 
-	void update(const size_t item)
+	void update(const unsigned long item)
 	{
-		size_t start = m[item];
+        unsigned long start = m[item];
 		sift_up(start);
 		sift_down(start);
 	}
@@ -74,40 +74,40 @@ public:
 	//void print()
 	//{
 	//	cout << "container" << endl << "[";
-	//	for (size_t i : c)
+	//	for (unsigned long i : c)
 	//		cout << i << ", ";
 	//	cout << "]" << endl;
 
 	//	//std::cout << "mappings" << std::endl;
-	//	//for (std::map<_ItemType, size_t>::iterator i=m.begin(); i != m.end(); i++)
+	//	//for (std::map<_ItemType, unsigned long>::iterator i=m.begin(); i != m.end(); i++)
 	//	//	std::cout << i->first << ":" << i->second << ", ";
 	//	//std::cout << std::endl;
 	//}
 
 private:
-	inline size_t parent(const size_t i) const
+	inline unsigned long parent(const unsigned long i) const
 	{
 		return (i - 1) >> 1;
 	}
 
-	inline size_t left(const size_t i) const
+	inline unsigned long left(const unsigned long i) const
 	{
 		return (i << 1) + 1;
 	}
 
-	inline size_t right(const size_t i) const
+	inline unsigned long right(const unsigned long i) const
 	{
 		return (i << 1) + 2;
 	}
 
-	void sift_down(const size_t start)
+	void sift_down(const unsigned long start)
 	{
-		size_t s = size();
-		size_t i = start;
+        unsigned long s = size();
+        unsigned long i = start;
 
 		while (true)
 		{
-			size_t min = i;
+            unsigned long min = i;
 			// left child's value is smallest -> needs swap
 			if (left(i) < s && comp(c[left(i)], c[min]))
 				min = left(i);
@@ -124,15 +124,15 @@ private:
 		}
 	}
 
-	void sift_up(const size_t start)
+	void sift_up(const unsigned long start)
 	{
-		size_t i = start;
+        unsigned long i = start;
 		while (true)
 		{
 			if (i == 0)
 				break;
 
-			size_t p = parent(i);
+            unsigned long p = parent(i);
 			// parent value is 'larger' than i's -> needs swap
 			if (comp(c[i], c[p]))
 			{

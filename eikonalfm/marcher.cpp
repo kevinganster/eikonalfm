@@ -6,7 +6,7 @@
 #include "heap.cpp"
 
 
-Marcher::Marcher(const double* const c, const int ndim, const size_t* const shape, const double* const dx, const int order):
+Marcher::Marcher(const double *const c, const int ndim, const unsigned long *const shape, const double *const dx, const int order):
     c(c),
     ndim(ndim),
     shape(shape),
@@ -15,7 +15,7 @@ Marcher::Marcher(const double* const c, const int ndim, const size_t* const shap
 {
     size = 1;
     dx_sq_inv = new double[ndim];
-    shift = new ptrdiff_t[ndim];
+    shift = new long[ndim];
 
     for (int i = ndim - 1; i >= 0; i--)
     {
@@ -43,9 +43,9 @@ Marcher::~Marcher()
     delete[] skip;
 }
 
-void Marcher::initialize(const size_t x_s, double* tau)
+void Marcher::initialize(const unsigned long x_s, double *tau)
 {
-    for (size_t i = 0; i < size; i++)
+    for (unsigned long i = 0; i < size; i++)
     {
         flags[i] = UNKNOWN;
         tau[i] = INF;
@@ -54,16 +54,16 @@ void Marcher::initialize(const size_t x_s, double* tau)
     tau[x_s] = 0;
 }
 
-void Marcher::solve(const size_t x_s, double* const tau)
+void Marcher::solve(const unsigned long x_s, double *const tau)
 {
     initialize(x_s, tau);
 
-    auto heap_comp = [&tau](const size_t e1, const size_t e2){ return tau[e1] < tau[e2]; };
+    auto heap_comp = [&tau](const unsigned long e1, const unsigned long e2){ return tau[e1] < tau[e2]; };
     Heap<decltype(heap_comp)> front(heap_comp, size);
     front.push(x_s);
 
     // list of points with minimal tau-values for each while-iteration
-    std::vector<size_t> minima;
+    std::vector<unsigned long> minima;
 
     // main loop for fast marching
     while (!front.empty())
@@ -92,17 +92,17 @@ void Marcher::solve(const size_t x_s, double* const tau)
                 done = true;
         }
 
-        for (size_t x_i : minima)
+        for (unsigned long x_i : minima)
         {
             // now we check all neighbors of x_i
-            size_t rem = x_i;
+            unsigned long rem = x_i;
             for (int d = 0; d < ndim; d++)
             {
                 // index in the current axis
-                size_t dim_i = rem / shift[d];
+                unsigned long dim_i = rem / shift[d];
                 rem -= dim_i * shift[d];
 
-                size_t x_n = x_i - shift[d];
+                unsigned long x_n = x_i - shift[d];
                 // valid neighbor to the 'left'
                 if (dim_i > 0 && flags[x_n] != KNOWN)
                 {
@@ -141,13 +141,13 @@ void Marcher::solve(const size_t x_s, double* const tau)
 const double nine_fourths = 9.0 / 4.0;
 const double one_third = 1.0 / 3.0;
 
-double Marcher::solve_quadratic(const size_t x, double* const tau) const
+double Marcher::solve_quadratic(const unsigned long x, double *const tau) const
 {
-    size_t rem = x;
+    unsigned long rem = x;
     for (int d = 0; d < ndim; d++)
     {
         // index in the current axis
-        size_t dim_i = rem / shift[d];
+        unsigned long dim_i = rem / shift[d];
         rem -= dim_i * shift[d];
 
         double tau_n = INF;
