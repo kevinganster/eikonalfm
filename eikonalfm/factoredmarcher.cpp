@@ -29,7 +29,7 @@ const long *FactoredMarcher::to_vector(unsigned long i)
 void FactoredMarcher::initialize(double *const tau0, double *const tau1, const unsigned long x_s, const long *const x_s_v)
 {
 	// iterating vector (see below)
-    unsigned long *x = new unsigned long[ndim];
+        long *x = new long[ndim];
 	for (int d = 0; d < ndim; d++)
 		x[d] = 0;
 
