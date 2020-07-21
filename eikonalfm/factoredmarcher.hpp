@@ -5,7 +5,7 @@
 class FactoredMarcher : public Marcher
 {
 private:
-	const long *to_vector(unsigned long i);
+	const long* to_vector(unsigned long i);
 	void initialize(double *const tau0, double *const tau1, const unsigned long x0, const long *const x0_v);
 
 protected:

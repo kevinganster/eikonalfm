@@ -13,9 +13,9 @@ using namespace std;
 int main()
 {
 	int ndim = 2;
-	size_t size = 11 * 6;
-	size_t* shape = new size_t[ndim] { 6, 11 };
-	double* dx = new double[ndim]{ 0.8, 0.8 };
+	unsigned long size = 11 * 6;
+	unsigned long* shape = new unsigned long[ndim] { 6, 11 };
+	double* dx = new double[ndim]{ 0.1, 0.1 };
 	int order = 2;
 
 	/*double c_[] = {
@@ -35,11 +35,7 @@ int main()
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     };
 	double* c = (double*)&c_;
-	size_t x0 = 5;
-
-	char str[21];
-	sprintf(str, "a %f", 1.0f);
-	cout << str << endl;
+	unsigned long x0 = 33;
 
 	double* tau = new double[size];
 	Marcher* m = new Marcher(c, ndim, shape, dx, order);

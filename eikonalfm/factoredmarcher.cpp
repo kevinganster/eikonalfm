@@ -4,7 +4,6 @@
 #include "factoredmarcher.hpp"
 #include "heap.cpp"
 
-
 #define tau(x) (tau0[x] * tau1[x])
 
 FactoredMarcher::FactoredMarcher(const double* const c, const int ndim, const unsigned long *const shape, const double* const dx, const int order) :
@@ -29,7 +28,7 @@ const long *FactoredMarcher::to_vector(unsigned long i)
 void FactoredMarcher::initialize(double *const tau0, double *const tau1, const unsigned long x_s, const long *const x_s_v)
 {
 	// iterating vector (see below)
-    unsigned long *x = new unsigned long[ndim];
+    long *x = new long[ndim];
 	for (int d = 0; d < ndim; d++)
 		x[d] = 0;
 
@@ -39,9 +38,7 @@ void FactoredMarcher::initialize(double *const tau0, double *const tau1, const u
 
 		double distance = 0;
 		for (int d = 0; d < ndim; d++)
-		{
-			distance += pow((double)((x[d] - x_s_v[d]) * dx[d]), 2);
-		}
+			distance += pow(((double)(x[d] - x_s_v[d]) * dx[d]), 2);
 
 		tau0[i] = sqrt(distance);
 		tau1[i] = INF;
@@ -49,7 +46,7 @@ void FactoredMarcher::initialize(double *const tau0, double *const tau1, const u
 		// increase vector-coordinates
 		for (int d = ndim - 1; d >= 0; d--)
 		{
-			if (++x[d] >= shape[d])
+			if ((unsigned long)++x[d] >= shape[d])
 				x[d] = 0;
 			else
 				break;

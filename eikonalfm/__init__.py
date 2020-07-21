@@ -9,7 +9,7 @@ and the factored eikonal equation
 
 See https://github.com/kevinganster/eikonalfm for more information
 """
-__version__ = "0.9.4"
+__version__ = "0.9.5"
 
 import numpy as np
 from .cfm import fast_marching, factored_fast_marching
@@ -23,8 +23,8 @@ def distance(shape, dx, x_s, indexing="xy"):
     ----------
         shape : sequence of ints
             Shape of the generated array.
-        x_s : sequence of doubles
-            Source position as position-vector, e.g. ``(0.5, 1)``.
+        x_s : sequence of ints
+            Source position as index-vector relative to the shape, e.g. ``(9, 3)``.
             Must have the same length as the number of dimensions of shape.
         dx : sequence of doubles
             Grid spacing for each dimension, dx > 0.
@@ -38,11 +38,12 @@ def distance(shape, dx, x_s, indexing="xy"):
         tau0 : ndarray
             euclidian distance field |x - x_s|.
     """
-    # TODO: maybe change x_s to index-vector to be consistent
     assert(len(shape) == len(dx) == len(x_s))
     x = []
     for shape_i, dx_i in zip(shape, dx):
         x.append(np.linspace(0, shape_i*dx_i, shape_i, endpoint=False))
-
     mesh = np.array(np.meshgrid(*x, indexing=indexing))
+    
+    # get real coordinates of x_s
+    x_s = np.array(x_s) * np.array(dx)
     return np.linalg.norm((mesh.T - x_s).T, ord=2, axis=0)

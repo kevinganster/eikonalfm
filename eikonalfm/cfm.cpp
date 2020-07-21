@@ -18,7 +18,6 @@
 // maybe #include "numpy/arrayobject.h" instead?
 #include "factoredmarcher.hpp"
 
-#include <iostream>
 // we don't want the function names to get 'mangled' by the compiler
 extern "C"
 {
@@ -232,10 +231,10 @@ static PyMethodDef fm_methods[] = {
 
 static PyModuleDef cfm_module = {
 	PyModuleDef_HEAD_INIT,
-	"cfm",																		// Module name to use with Python import statements
+	"cfm",                                                                 // Module name to use with Python import statements
 	"c++ implementation of (factored) fast marching for the eikonal equation",  // Module description
 	0,
-	fm_methods																	// Structure that defines the methods of the module
+	fm_methods																	        // Structure that defines the methods of the module
 };
 
 
