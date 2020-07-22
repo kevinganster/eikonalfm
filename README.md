@@ -54,8 +54,8 @@ To visualize the results, matplotlib (https://pypi.org/project/matplotlib/) can 
 ```
 import matplotlib.pyplot as plt
 
-# for the distance-function 'x_s' describes real coordinates
-tau0 = eikonalfm.distance(tau1_ffm.shape, dx, x_s)
+# for the distance-function 'x_s' also describes an index-vector
+tau0 = eikonalfm.distance(tau1_ffm.shape, dx, x_s, indexing="ij")
 plt.contourf(tau0 * tau1_ffm)
 plt.show()
 ```
