@@ -18,17 +18,20 @@
 // maybe #include "numpy/arrayobject.h" instead?
 #include "factoredmarcher.hpp"
 
+
 // we don't want the function names to get 'mangled' by the compiler
 extern "C"
 {
-static PyObject* fast_marching_(PyObject *args, const bool factored)
+static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool factored)
 {
+	static char* keywords[] = {"c", "x_s", "dx", "order", "output_sensitivities", NULL};
 	// define placeholders
 	PyObject *pc, *px_s, *pdx;
 	int order;
+	bool output_sensitivities = false;
 
 	// parse arguments
-	if (!PyArg_ParseTuple(args, "OOOi", &pc, &px_s, &pdx, &order))
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOi|b", keywords, &pc, &px_s, &pdx, &order, &output_sensitivities))
 		return NULL;
 
 	// only orders 1 and 2 are implemented
@@ -59,7 +62,7 @@ static PyObject* fast_marching_(PyObject *args, const bool factored)
 	else if (PyArray_SIZE(x_s_) != ndim)
 	{
 		char msg[100];
-		std::sprintf(msg, "size of x_s and number of dimensions of c do not match: %ld != %d.", PyArray_SIZE(x_s_), ndim);
+		std::sprintf(msg, "size of x_s and number of dimensions of c do not match: %d != %d.", (int)PyArray_SIZE(x_s_), ndim);
 		PyErr_SetString(PyExc_ValueError, msg);
 		Py_DECREF(c);
 		Py_DECREF(x_s_);
@@ -78,26 +81,26 @@ static PyObject* fast_marching_(PyObject *args, const bool factored)
 	else if (PyArray_SIZE(dx_) != ndim)
 	{
 		char msg[100];
-		std::sprintf(msg, "size of dx and number of dimensions of c do not match: %ld != %d.", PyArray_SIZE(dx_), ndim);
+		std::sprintf(msg, "size of dx and number of dimensions of c do not match: %d != %d.", (int)PyArray_SIZE(dx_), ndim);
 		PyErr_SetString(PyExc_ValueError, msg);
 		Py_DECREF(c);
         Py_DECREF(x_s_);
 		return NULL;
 	}
 
-	double *dx = (double *)PyArray_DATA(dx_);
+	double* dx = (double*)PyArray_DATA(dx_);
 	// TODO: maybe change this to 'long', since x_s_d is of type 'long' anyways
-	unsigned long *shape = new unsigned long[ndim];
+	usize* shape = new usize[ndim];
 	// index version of x0_
-    unsigned long x_s = 0;
+    usize x_s = 0;
+    ssize* x_s_d = (ssize*)PyArray_DATA(x_s_);
 
-    long *x_s_d = (long *)PyArray_DATA(x_s_);
-    unsigned long tmp = 1;
+    usize tmp = 1;
 	for (int i = ndim - 1; i >= 0; i--)
 	{
 		shape[i] = PyArray_DIM(c, i);
 
-		if (x_s_d[i] < 0 || x_s_d[i] >= (long)shape[i])
+		if (x_s_d[i] < 0 || x_s_d[i] >= (ssize)shape[i])
 		{
 			char msg[128];
 			std::sprintf(msg, "entries of x_s have to be within the shape of c, but entry %d with value %ld is not in [0, %ld].", i, x_s_d[i], shape[i]-1);
@@ -135,11 +138,15 @@ static PyObject* fast_marching_(PyObject *args, const bool factored)
 		return NULL;
 	}
 
+	auto *info = new MarcherInfo{ndim, shape};
+	if (output_sensitivities)
+		info = new SensitivityInfo{ndim, shape};
+
 	Marcher* m;
 	if (factored)
-		m = new FactoredMarcher((double *)PyArray_DATA(c), ndim, shape, dx, order);
+		m = new FactoredMarcher{(double *)PyArray_DATA(c), *info, dx, order};
 	else
-		m = new Marcher((double *)PyArray_DATA(c), ndim, shape, dx, order);
+		m = new Marcher{(double *)PyArray_DATA(c), *info, dx, order};
 
 
 	try
@@ -161,18 +168,32 @@ static PyObject* fast_marching_(PyObject *args, const bool factored)
 
 	delete m;
 	delete[] shape;
+	
+	if (output_sensitivities)
+	{
+		npy_intp *npy_shape = PyArray_DIMS(c);
 
-	return (PyObject *)tau;
+		npy_intp *orders_shape = new npy_intp[ndim + 1];
+		orders_shape[0] = ndim; // one array for each dimension
+		for (int d=0; d < ndim; d++)
+			orders_shape[d+1] = npy_shape[d];
+
+		PyObject *sequence = PyArray_New(&PyArray_Type, ndim, npy_shape, NPY_LONG, NULL, ((SensitivityInfo *)info)->sequence, 0, NPY_ARRAY_CARRAY, NULL);
+		PyObject *orders = PyArray_New(&PyArray_Type, ndim+1, orders_shape, NPY_INT8, NULL, ((SensitivityInfo *)info)->orders, 0, NPY_ARRAY_CARRAY, NULL);
+		return Py_BuildValue("OOO", (PyObject *)tau, sequence, orders);
+	}
+	else
+		return (PyObject *)tau;
 }
 
-static PyObject *fast_marching_wrapper(PyObject* self, PyObject* args)
+static PyObject *fast_marching_wrapper(PyObject* self, PyObject* args, PyObject* kwargs)
 {
-	return fast_marching_(args, false);
+	return fast_marching_(args, kwargs, false);
 }
 
-static PyObject *factored_marching_wrapper(PyObject* self, PyObject* args)
+static PyObject *factored_marching_wrapper(PyObject* self, PyObject* args, PyObject* kwargs)
 {
-	return fast_marching_(args, true);
+	return fast_marching_(args, kwargs, true);
 }
 
 
@@ -182,8 +203,8 @@ static PyObject *factored_marching_wrapper(PyObject* self, PyObject* args)
 // 3) flags indicating whether or not keywords are accepted for this function, and 
 // 4) The docstring for the function.
 static PyMethodDef fm_methods[] = {
-	{"fast_marching", (PyCFunction)fast_marching_wrapper, METH_VARARGS,
-        "fast_marching(c, x_s, dx, order)\n--\n\n"
+	{"fast_marching", (PyCFunction)fast_marching_wrapper, METH_VARARGS | METH_KEYWORDS,
+        "fast_marching(c, x_s, dx, order, output_sensitivities=False)\n--\n\n"
         "    Calculates the fast marching solution to the eikonal equation.\n"
         "\n"
         "    Parameters\n"
@@ -196,14 +217,20 @@ static PyMethodDef fm_methods[] = {
         "        Grid spacing for each dimension, dx > 0. Must have the same length as the number of dimensions of c.\n"
         "    order : {1, 2}\n"
         "        Order of the finite difference operators.\n"
+		"    output_sensitivities : boolean, optional\n"
+		"        Additionally returns sensitivity data if True.\n"
         "\n"
         "    Returns\n"
         "    ----------\n"
         "    tau : ndarray\n"
-        "        numerical solution tau for the eikonal equation."
+        "        numerical solution tau for the eikonal equation.\n"
+		"    sequence : ndarray, optional\n"
+		"        Only returned when 'output_sensitivities=True'. The sequence in which each gridpoint was set to known.\n"
+		"    orders : ndarray, optional\n"
+		"        Only returned when 'output_sensitivities=True'. The finite difference orders for each dimension used at each gridpoint."
     },
-	{"factored_fast_marching", (PyCFunction)factored_marching_wrapper, METH_VARARGS,
-        "factored_fast_marching(c, x_s, dx, order)\n--\n\n"
+	{"factored_fast_marching", (PyCFunction)factored_marching_wrapper, METH_VARARGS | METH_KEYWORDS,
+        "factored_fast_marching(c, x_s, dx, order, output_sensitivities=False)\n--\n\n"
         "    Calculates the fast marching solution to the factored eikonal equation.\n"
         "\n"
         "    Parameters\n"
@@ -216,12 +243,18 @@ static PyMethodDef fm_methods[] = {
         "        Grid spacing for each dimension, dx > 0. Must have the same length as the number of dimensions of c.\n"
         "    order : {1, 2}\n"
         "        Order of the finite difference operators.\n"
+		"    output_sensitivities : boolean, optional\n"
+		"        Additionally returns sensitivity data if True.\n"
         "\n"
         "    Returns\n"
         "    ----------\n"
         "    tau1 : ndarray\n"
         "        numerical solution tau1 for the factored eikonal equation.\n"
-        "        To get tau, you need to multiply this with the distance field tau0."
+        "        To get tau, you need to multiply this with the distance field tau0.\n"
+		"    sequence : ndarray, optional\n"
+		"        Only returned when 'output_sensitivities=True'. The sequence in which each gridpoint was set to known.\n"
+		"    orders : ndarray, optional\n"
+		"        Only returned when 'output_sensitivities=True'. The finite difference orders for each dimension used at each gridpoint."
     },
 
 	// Terminate the array with an object containing nulls.

@@ -85,7 +85,7 @@ def parse_setuppy_commands():
     if "install" in args:
         print("Note: if you need reliable uninstall behavior, you should install with pip instead of using `setup.py install`:"
               "  - `pip install .`       (from a git repo or downloaded source release)"
-              "  - `pip install eikonal-fm`   (last eikonal-fm release on PyPI)")
+              "  - `pip install eikonalfm`   (last eikonalfm release on PyPI)")
         return True
 
     return False

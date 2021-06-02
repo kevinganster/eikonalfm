@@ -8,6 +8,9 @@
 //	#include "debugtests.h"
 //#endif
 
+// "sizes" used (signed and unsigned)
+using ssize = long;
+using usize = unsigned long;
 
 const double INF = std::numeric_limits<double>::infinity();
 const double N_INF = std::numeric_limits<double>::lowest();
@@ -17,46 +20,76 @@ const char KNOWN = 1;
 const char FRONT = 2;
 
 
+class MarcherInfo
+{
+public:
+	// number of dimensions
+	const int ndim;
+	// shape (of the mesh)
+    const usize* const shape;
+    // total number of grid points
+    usize size;
+
+    MarcherInfo(const int ndim, const usize* shape);
+
+	// No-Op functions for sensitivities in the base class
+	virtual void store_sequence(const usize x){};
+	virtual void store_order(const int dim, const usize x, const char o){};
+};
+
+class SensitivityInfo : public MarcherInfo
+{
+public:
+	// execution sequence
+	usize counter = 0;
+	usize* sequence;
+	// finite difference order
+	char* orders;
+
+	SensitivityInfo(const int ndim, const usize* shape): MarcherInfo{ndim, shape}
+	{
+		sequence = new usize[size];
+		orders = new char[ndim*size];
+	};
+
+	void store_sequence(const usize x) override;
+	void store_order(const int dim, const usize x, const char o) override;
+};
+
+
 class Marcher
 {
 protected:
 	// slowness field
-	const double *const c;
+	const double* const c;
 
-	// number of dimensions (of c)
-	const int ndim;
-	// shape (of c)
-	const unsigned long *const shape;
-	// total number of grid points
-    unsigned long size;
-	// grid spacing (for each axis)
-	const double* const dx;
-	// order of the finite difference used
+	MarcherInfo& info;
+    // grid spacing (for each axis)
+    const double* const dx;
+	// maximum order of the finite difference used
 	const int order;
 
-	// the shift to apply in every dimension to get a points neighbor (ptrdiff_t since we sometimes multiply this with -1)
-	long* shift;
-
+	// the shift to apply in every dimension to get a points neighbor (signed since we sometimes multiply this with -1)
+	ssize* shift;
 	// flags for each grid-point
 	char* flags;
 
-	double solve_quadratic(const unsigned long x, double *const tau) const;
-
 	// storage containers for solve_quadratic
-	double *alpha_sq, *beta;
-	bool *skip;
+	double* alpha_sq, * beta;
+	bool* skip;
+	auto solve_quadratic(const usize x, double* const tau) const -> double;
 
 private:
 	// inverse squared grid-spacing in each dimension (dx^2), used in solve_quadratic
-	double *dx_sq_inv;
+	double* dx_sq_inv;
 
-	void initialize(const unsigned long x0, double *const tau);
+	void initialize(const usize x0, double* const tau);
 
 public:
-	Marcher(const double *const c, const int ndim, const unsigned long *const shape, const double *const dx, const int order);
+	Marcher(const double* const c, MarcherInfo& info, const double* dx, const int order);
 
 	virtual ~Marcher();
 
 	// virtual in the base class tells the compiler to do a late bind (see http://www.willemer.de/informatik/cpp/cppvirt.htm)
-	virtual void solve(const unsigned long x0, double *const tau);
+	virtual void solve(const usize x0, double* const tau);
 };

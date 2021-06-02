@@ -5,14 +5,14 @@
 class FactoredMarcher : public Marcher
 {
 private:
-	const long* to_vector(unsigned long i);
-	void initialize(double *const tau0, double *const tau1, const unsigned long x0, const long *const x0_v);
+	const ssize* to_vector(usize i);
+	void initialize(double* const tau0, double* const tau1, const usize x0, const ssize* const x0_v);
 
 protected:
-	double solve_quadratic(const double *const tau0, const double *const tau1, const long *const x0, const unsigned long x);
+	double solve_quadratic(const double* const tau0, const double* const tau1, const ssize* const x0, const usize x);
 
 public:
-	FactoredMarcher(const double *const c, const int ndim, const unsigned long *const shape, const double *const dx, const int order);
+	FactoredMarcher(const double* const c, MarcherInfo& info, const double* const dx, const int order);
 
-	void solve(const unsigned long x0, double *const tau1);
+	void solve(const usize x0, double* const tau1);
 };

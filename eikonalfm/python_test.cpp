@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include <errcode.h>
+//#include <errcode.h>
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
@@ -17,12 +17,11 @@
 
 //#include "numpy/noprefix.h"
 #include "numpy/arrayobject.h"
-#include "factoredmarcher.hpp"
+#include "marcher.hpp"
 
 using namespace std;
 
-
-static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool factored)
+static PyObject* fast_marching(PyObject* self, PyObject* args)
 {
 	// define placeholders
 	PyObject* pc, * px0, * pdx;
@@ -62,7 +61,7 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 	}
 
 	double* dx = (double*)PyArray_DATA(dx_);
-	size_t* shape = new size_t[ndim];
+	unsigned long* shape = new unsigned long[ndim];
 	// index version of x0_
 	size_t x0 = 0;
 
@@ -108,13 +107,11 @@ static PyObject* fast_marching_(PyObject* self, PyObject* args, const bool facto
 		return NULL;
 	}
 
-	Marcher* m;
-	if (factored)
-		m = new FactoredMarcher((double*)PyArray_DATA(c), ndim, shape, dx, order);
-	else
-		m = new Marcher((double*)PyArray_DATA(c), ndim, shape, dx, order);
+	auto info = MarcherInfo{ndim, shape};
+	Marcher* m = new Marcher((double*)PyArray_DATA(c), info, dx, order);
 
 	m->solve(x0, (double*)PyArray_DATA(tau));
+
 	delete m;
 	delete[] shape;
 
@@ -126,6 +123,8 @@ int main()
 {
 	//Py_SetPath(Py_DecodeLocale("E:\\Anaconda\\Lib;E:\\Anaconda\\Lib\\site-packages;E:\\Anaconda\\DLLs", NULL));
     //Py_SetPath(Py_DecodeLocale("~\\anaconda3\\lib;~\\anaconda3\\lib\\python3.7\\site-packages;", NULL));
+    Py_SetPath(Py_DecodeLocale("D:\\Funktionsprogramme\\Anaconda\\lib;D:\\Funktionsprogramme\\Anaconda\\lib\\site-packages;D:\\Funktionsprogramme\\Anaconda\\DLLs", NULL));
+
 	Py_Initialize();
 	import_array();
 
@@ -154,7 +153,7 @@ int main()
 	// order
 	PyTuple_SET_ITEM(args, 3, PyLong_FromLong(2));
 
-	PyArrayObject* tau = (PyArrayObject*) fast_marching_(NULL, args, false);
+	PyArrayObject* tau = (PyArrayObject*) fast_marching(NULL, args);
 	double* tau_c = (double*)PyArray_DATA(tau);
 
 	for (int i = 0; i < 121; i++)

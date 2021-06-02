@@ -37,8 +37,10 @@ int main()
 	double* c = (double*)&c_;
 	unsigned long x0 = 33;
 
+	auto info = MarcherInfo{ndim, shape};
+
 	double* tau = new double[size];
-	Marcher* m = new Marcher(c, ndim, shape, dx, order);
+	Marcher* m = new Marcher(c, info, dx, order);
 	m->solve(x0, tau);
 
 	int s = 0;
@@ -57,26 +59,26 @@ int main()
 	delete[] tau;
 
 
-	tau = new double[size];
-	m = new FactoredMarcher(c, ndim, shape, dx, order);
-	m->solve(x0, tau);
+	// tau = new double[size];
+	// m = new FactoredMarcher(c, info, dx, order);
+	// m->solve(x0, tau);
 
-	s = 0;
-	cout << "factored marcher solution:" << endl;
-	for (int i = 0; i < size; i++)
-	{
-		printf("%2.2f\t", tau[i]);
-		if (++s >= shape[1])
-		{
-			s = 0;
-			cout << endl;
-		}
-	}
+	// s = 0;
+	// cout << "factored marcher solution:" << endl;
+	// for (int i = 0; i < size; i++)
+	// {
+	// 	printf("%2.2f\t", tau[i]);
+	// 	if (++s >= shape[1])
+	// 	{
+	// 		s = 0;
+	// 		cout << endl;
+	// 	}
+	// }
 
-	delete[] shape;
-	delete[] dx;
-	delete m;
-	delete[] tau;
+	// delete[] shape;
+	// delete[] dx;
+	// delete m;
+	// delete[] tau;
 
 	//_CrtDumpMemoryLeaks();
 	return 0;

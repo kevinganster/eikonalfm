@@ -17,6 +17,9 @@ build/
 .pydevproject
 .settings/
 
+# Visual Studio Code
+.vscode/
+
 #CLion
 .idea
 cmake-build-debug/
