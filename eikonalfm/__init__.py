@@ -9,7 +9,11 @@ and the factored eikonal equation
 
 See https://github.com/kevinganster/eikonalfm for more information
 """
-__version__ = "0.9.5"
+__title__ = "eikonalfm"
+__version__ = "0.9.6"
+__author__ = "Kevin Ganster"
+__email__ = "kevinganster@gmail.com"
+
 
 import numpy as np
 from .cfm import fast_marching, factored_fast_marching

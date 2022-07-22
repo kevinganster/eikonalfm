@@ -36,7 +36,7 @@ public:
 
     unsigned long size() const
 	{	// return length of queue
-		return c.size();
+		return (unsigned long)c.size();
 	}
 
     unsigned long top() const

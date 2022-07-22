@@ -2,6 +2,9 @@
 // https://docs.microsoft.com/de-de/visualstudio/python/working-with-c-cpp-python-in-visual-studio?view=vs-2019
 // https://docs.scipy.org/doc/numpy-1.13.0/user/c-info.how-to-extend.html
 
+#ifndef Py_cfm
+#define Py_cfm
+
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 #ifdef _DEBUG
@@ -14,24 +17,39 @@
 
 #include <exception>
 #include <cstdio>
+#include <signal.h>
 #include "numpy/noprefix.h"
 // maybe #include "numpy/arrayobject.h" instead?
 #include "factoredmarcher.hpp"
 
+class InterruptExc : public std::exception
+{
+public:
+    InterruptExc() {}
+    //~MyException() {}
+};
+
+void signal_handler(int code)
+{
+   throw InterruptExc();
+}
 
 // we don't want the function names to get 'mangled' by the compiler
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool factored)
 {
-	static char* keywords[] = {"c", "x_s", "dx", "order", "output_sensitivities", NULL};
+    // will be const_cast<char**>() below, hopefully PyArg_ParseTupleAndKeywords doesn't try to alter it
+    const char* keywords[] = {"c", "x_s", "dx", "order", "output_sensitivities", NULL};
 	// define placeholders
 	PyObject *pc, *px_s, *pdx;
 	int order;
 	bool output_sensitivities = false;
 
 	// parse arguments
-	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOi|b", keywords, &pc, &px_s, &pdx, &order, &output_sensitivities))
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOi|b", const_cast<char**>(keywords), &pc, &px_s, &pdx, &order, &output_sensitivities))
 		return NULL;
 
 	// only orders 1 and 2 are implemented
@@ -148,7 +166,8 @@ static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 	else
 		m = new Marcher{(double *)PyArray_DATA(c), *info, dx, order};
 
-
+    // install custom sigintterrupt handler (CTRL+C)
+    auto handler_sigint = signal(SIGINT, signal_handler);
 	try
 	{
 		m->solve(x_s, (double *)PyArray_DATA(tau));
@@ -166,6 +185,8 @@ static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 		return NULL;
 	}
 
+    // restore original signal handler
+    signal(SIGINT, handler_sigint);
 	delete m;
 	delete[] shape;
 	
@@ -195,7 +216,6 @@ static PyObject *factored_marching_wrapper(PyObject* self, PyObject* args, PyObj
 {
 	return fast_marching_(args, kwargs, true);
 }
-
 
 // Each entry in this array is a PyMethodDef structure containing 
 // 1) the Python name,
@@ -261,15 +281,13 @@ static PyMethodDef fm_methods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
-
-static PyModuleDef cfm_module = {
+static struct PyModuleDef cfm_module = {
 	PyModuleDef_HEAD_INIT,
-	"cfm",                                                                 // Module name to use with Python import statements
+	"cfm",                                                                 		// Module name to use with Python import statements
 	"c++ implementation of (factored) fast marching for the eikonal equation",  // Module description
-	0,
-	fm_methods																	        // Structure that defines the methods of the module
+	0,																			// size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
+	fm_methods																	// Structure that defines the methods of the module
 };
-
 
 PyMODINIT_FUNC PyInit_cfm(void)
 {
@@ -280,4 +298,9 @@ PyMODINIT_FUNC PyInit_cfm(void)
 	import_array();
 	return m;
 }
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // !defined(Py_cfm)

@@ -1,50 +1,39 @@
 #!/usr/bin/env python
 import sys
+from setuptools import setup, Extension
+import re
 
 
 def readme():
     with open("README.md", "r") as f:
         return f.read()
 
+# get metadata from module
+with open("eikonalfm/__init__.py") as f:
+    metadata = dict(re.findall(r'__(.*)__ ?= ?"(.+)"', f.read()))
 
-def configuration(parent_package="", top_path=None):
-    from numpy.distutils.misc_util import Configuration
-
-    config = Configuration(None, parent_package, top_path)
-    config.set_options(
-        ignore_setup_xxx_py=True,
-        assume_default_configuration=True,
-        delegate_options_to_subpackages=True,
-        quiet=True)
-
-    # add the subpackage 'eikonalfm' to the config (to call it's setup.py later)
-    config.add_subpackage("eikonalfm")
-
-    return config
-
-
-#from distutils.command.sdist import sdist
 
 pkg_metadata = dict(
-    name             = "eikonalfm",
-    version          = "0.9.5",
+    name             = metadata['title'],
+    version          = metadata['version'],
+    author           = metadata['author'],
+    author_email     = metadata['email'],
     description      = "solving the (factored) eikonal equation with the Fast Marching method",
     long_description = readme(),
     long_description_content_type = "text/markdown",
     url              = "https://github.com/kevinganster/eikonalfm",
-    author           = "Kevin Ganster",
-    author_email     = "kevinganster@gmail.com",
     license          = "MIT",
     keywords         = "Fast Marching method, factored Fast Marching method, eikonal equation, factored eikonal equation",
-    configuration    = configuration,
-    install_requires = ["numpy >= 1.7"],
+    python_requires = ">= 3.0",
+    install_requires = [ "setuptools < 60.0",
+                         "numpy >= 1.7"],
     # "Development Status :: 4 - Beta",
     classifiers      = [ "License :: OSI Approved :: MIT License",
                          "Operating System :: OS Independent",
                          "Topic :: Scientific/Engineering :: Mathematics",
                          "Programming Language :: C++",
                          "Programming Language :: Python :: 3"],
-#    cmdclass={"sdist": sdist}
+    packages = ["eikonalfm"]
 )
 
 
@@ -103,9 +92,24 @@ if __name__ == "__main__":
     from setuptools import setup
 
     if run_build:
-        from numpy.distutils.core import setup
-    # Don't import numpy in other cases - non-build actions are required to succeed without NumPy,
-    # for example when pip is used to install this when NumPy is not yet present in the system.
+        # non-build actions should not include the extension module,
+        # for example when pip is used to install this when NumPy is not yet present in the system.
+        # for wheels numpy has to be already installed
+        import numpy as np
+
+        pkg_metadata['ext_modules'] = [
+            Extension(
+                "eikonalfm.cfm",
+                sources=[   "eikonalfm/cfm.cpp",
+                            "eikonalfm/marcher.cpp",
+                            "eikonalfm/factoredmarcher.cpp",
+                            "eikonalfm/heap.cpp"],
+                include_dirs=[  "eikonalfm",
+                                np.get_include()],
+                language="c++",
+                extra_compile_args=["-std=c++11"]  # god damn it Mac OS
+            )
+        ]
 
     setup(**pkg_metadata)
 

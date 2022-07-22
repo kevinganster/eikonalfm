@@ -29,7 +29,7 @@ Manual install from the repository:
 ```
 git clone https://github.com/kevinganster/eikonalfm.git
 cd eikonalfm
-python setup.py
+pip install .
 ```
 
 
