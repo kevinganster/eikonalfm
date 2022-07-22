@@ -11,31 +11,39 @@ where <img src="https://latex.codecogs.com/svg.latex?\inline&space;\tau_0(x)=\lv
 - Eran Treister and Eldad Haber. A fast marching algorithm for the factored eikonal equation. Journal of Computational Physics, 324:210-225, 2016.
 
 
-# Requirements
+## Requirements
 
 - Python 3
 - numpy version 1.7 or higher
 - C++11 compiler
 
 
-# Installation
+## Installation
 
-Installation from PyPi:  
-```
+### Installation from PyPi:
+
+```bash
 pip install eikonalfm
 ```
 
-Manual install from the repository:  
-```
+### Manual install from the repository:
+
+```bash
 git clone https://github.com/kevinganster/eikonalfm.git
 cd eikonalfm
 pip install .
 ```
 
+or
 
-# Examples
-
+```bash
+pip install git+https://github.com/kevinganster/eikonalfm.git
 ```
+
+
+## Examples
+
+```python
 import numpy as np
 import eikonalfm
 
@@ -50,8 +58,9 @@ tau1_ffm = eikonalfm.factored_fast_marching(c, x_s, dx, order)
 
 Note that the source position `x_s` describes an index-vector.
 
-To visualize the results, matplotlib (https://pypi.org/project/matplotlib/) can be used, for example:  
-```
+To visualize the results, matplotlib (https://pypi.org/project/matplotlib/) can be used, for example:
+
+```python
 import matplotlib.pyplot as plt
 
 # for the distance-function 'x_s' also describes an index-vector
