@@ -64,7 +64,9 @@ void FactoredMarcher::solve(const usize x_s, double* const tau1)
 	initialize(tau0, tau1, x_s, x_s_v);
 
     for (int d=0; d < info.ndim; d++)
-        info.store_order(d, x_s, 0);
+    {
+		info.store_order(d, x_s, 0);
+	}
 
 	auto heap_comp = [&tau0, &tau1](const usize e1, const usize e2) { return tau(e1) < tau(e2); };
 	Heap<decltype(heap_comp)> front(heap_comp, info.size);
