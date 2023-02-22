@@ -2,20 +2,17 @@
 #include <queue>
 #include <math.h>
 #include <stdexcept>
+#include <numeric>
+#include <functional>
 #include "marcher.hpp"
 #include "heap.cpp"
 
 
-MarcherInfo::MarcherInfo(const int ndim, const usize* shape):
+MarcherInfo::MarcherInfo(const int ndim, const usize *shape):
     ndim(ndim),
-    shape(shape)
-{
-    size = 1;
-    for (int i = ndim - 1; i >= 0; i--)
-    {
-        size *= shape[i];
-    }
-}
+    shape(shape),
+    size(std::accumulate(shape, shape+ndim, 1, std::multiplies<usize>()))
+{}
 
 void SensitivityInfo::store_sequence(const usize x)
 {
@@ -28,7 +25,7 @@ void SensitivityInfo::store_order(const int dim, const usize x, const char o)
 }
 
 
-Marcher::Marcher(const double* const c, MarcherInfo& info, const double* dx, const int order):
+Marcher::Marcher(const double *const c, MarcherInfo &info, const double *dx, const int order):
     c(c),
     info(info),
     dx(dx),
@@ -64,7 +61,7 @@ Marcher::~Marcher()
     delete[] skip;
 }
 
-void Marcher::initialize(const usize x_s, double* tau)
+void Marcher::initialize(const usize x_s, double *tau)
 {
     for (usize i = 0; i < info.size; i++)
     {
@@ -75,7 +72,7 @@ void Marcher::initialize(const usize x_s, double* tau)
     tau[x_s] = 0;
 }
 
-void Marcher::solve(const usize x_s, double* const tau)
+void Marcher::solve(const usize x_s, double *const tau)
 {
     initialize(x_s, tau);
 
@@ -168,7 +165,7 @@ void Marcher::solve(const usize x_s, double* const tau)
 const double nine_fourths = 9.0 / 4.0;
 const double one_third = 1.0 / 3.0;
 
-double Marcher::solve_quadratic(const usize x, double* const tau) const
+double Marcher::solve_quadratic(const usize x, double *const tau) const
 {
     usize rem = x;
     for (int d = 0; d < info.ndim; d++)
@@ -220,7 +217,6 @@ double Marcher::solve_quadratic(const usize x, double* const tau) const
             info.store_order(d, x, 0);
         }
     }
-
 
     double c_base = -1.0 / pow(this->c[x], 2);
     double a, b, c;
