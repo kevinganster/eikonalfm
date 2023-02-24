@@ -119,21 +119,23 @@ jobs:
       
       - uses: actions/upload-artifact@v3
         with:
-          name: sdist
+          # name: sdist
           path: ./dist/*.tar.gz
 
-  # upload_pypi:
-  #   needs: ["build_wheels", "build_sdist"]
-  #   runs-on: ubuntu-latest
+  upload_pypi:
+    needs: ["build_wheels", "build_sdist"]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   - uses: actions/download-artifact@v3
-  #     with:
-  #       # unpacks default artifact into dist/
-  #       name: artifact
-  #       path: dist
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        # unpacks default artifact into dist/
+        name: artifact
+        path: dist
 
-  #   #- uses: pypa/gh-action-pypi-publish@v1.5.0
-  #   #  with:
-  #   #    user: __token__
-  #   #    password: ${{ secrets.pypi_password }}
+    - uses: pypa/gh-action-pypi-publish@v1.5.0
+      with:
+        repository_url: https://test.pypi.org/legacy/
+        user: __token__
+        # password: ${{ secrets.PYPI_API_TOKEN }}
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
