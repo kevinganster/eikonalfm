@@ -32,9 +32,13 @@ public:
 
     MarcherInfo(const int ndim, const usize *shape);
 
+	virtual ~MarcherInfo(){}
+
 	// No-Op functions for sensitivities in the base class
-	virtual void store_sequence(const usize x){};
-	virtual void store_order(const int dim, const usize x, const char o){};
+	virtual void store_sequence(const usize x){}
+	virtual void store_order(const int dim, const usize x, const char o){}
+	virtual usize *get_sequence(){ return nullptr; }
+	virtual char *get_order(){ return nullptr; }
 };
 
 class SensitivityInfo : public MarcherInfo
@@ -50,10 +54,26 @@ public:
 	{
 		sequence = new usize[size];
 		orders = new char[ndim*size];
-	};
+	}
+
+	~SensitivityInfo() override
+	{
+		// delete[] sequence;
+		// delete[] orders;
+	}
 
 	void store_sequence(const usize x) override;
 	void store_order(const int dim, const usize x, const char o) override;
+
+	auto get_sequence() -> usize * override
+	{
+		return sequence;
+	}
+
+	auto get_order() -> char * override
+	{
+		return orders;
+	}
 };
 
 

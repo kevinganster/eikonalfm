@@ -11,9 +11,9 @@ FactoredMarcher::FactoredMarcher(const double* const c, MarcherInfo& info, const
 {
 }
 
-const ssize* FactoredMarcher::to_vector(usize i)
+const ssize *FactoredMarcher::to_vector(usize i)
 {
-    ssize* x = new ssize[info.ndim];
+    ssize *x = new ssize[info.ndim];
     usize rem = i;
 
 	for (int d = 0; d < info.ndim; d++)
@@ -28,7 +28,7 @@ const ssize* FactoredMarcher::to_vector(usize i)
 void FactoredMarcher::initialize(double *const tau0, double *const tau1, const unsigned long x_s, const long *const x_s_v)
 {
 	// iterating vector (see below)
-    ssize* x = new ssize[info.ndim];
+    ssize *x = new ssize[info.ndim];
 	for (int d = 0; d < info.ndim; d++)
 		x[d] = 0;
 
@@ -57,10 +57,10 @@ void FactoredMarcher::initialize(double *const tau0, double *const tau1, const u
 	tau1[x_s] = 1.0 / c[x_s];
 }
 
-void FactoredMarcher::solve(const usize x_s, double* const tau1)
+void FactoredMarcher::solve(const usize x_s, double *const tau1)
 {
-	double* tau0 = new double[info.size];
-	const ssize* const x_s_v = to_vector(x_s);
+	double *tau0 = new double[info.size];
+	const ssize *const x_s_v = to_vector(x_s);
 	initialize(tau0, tau1, x_s, x_s_v);
 
     for (int d=0; d < info.ndim; d++)

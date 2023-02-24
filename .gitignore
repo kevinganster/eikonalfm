@@ -8,6 +8,9 @@ __pycache__/
 dist/
 build/
 
+# venv folder
+/env/
+
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
 /*.egg

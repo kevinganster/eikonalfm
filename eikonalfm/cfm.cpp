@@ -7,6 +7,8 @@
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
+// Make "s#" use Py_ssize_t rather than int.
+#define PY_SSIZE_T_CLEAN
 #ifdef _DEBUG
 	#undef _DEBUG
 	#include <Python.h>
@@ -15,7 +17,7 @@
 	#include <Python.h>
 #endif
 
-#include <exception>
+#include <stdexcept>
 #include <cstdio>
 #include <signal.h>
 #include <memory>
@@ -25,6 +27,7 @@
 #include "numpy/arrayobject.h"
 
 #include "factoredmarcher.hpp"
+#include <iostream>
 
 class InterruptExc : public std::exception
 {
@@ -88,10 +91,10 @@ auto format(const char *format_str, Args&&... args) -> std::unique_ptr<char[]>
 extern "C" {
 #endif
 
-static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool factored)
+static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool factored)
 {
     // will be const_cast<char**>() below, hopefully PyArg_ParseTupleAndKeywords doesn't try to alter it
-    const char* keywords[] = {"c", "x_s", "dx", "order", "output_sensitivities", NULL};
+    const char *keywords[] = {"c", "x_s", "dx", "order", "output_sensitivities", NULL};
 	// define placeholders
 	PyObject *pc, *px_s, *pdx;
 	int order;
@@ -161,7 +164,6 @@ static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 		{
 			PyErr_SetString(PyExc_ValueError, format("entries of dx must be greater than zero, but entry %d with value %f is not.", d, dx[d]).get());
 			collection.DECREF();
-			delete[] shape;
 			return NULL;
 		}
 
@@ -174,9 +176,12 @@ static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 	if (!collection.validate(tau, PyExc_MemoryError, "couldn't create result array."))
 		return NULL;
 
-	auto *info = new MarcherInfo{ndim, shape};
+	std::unique_ptr<MarcherInfo> info;
 	if (output_sensitivities)
-		info = new SensitivityInfo{ndim, shape};
+		info = std::unique_ptr<MarcherInfo>(new SensitivityInfo{ndim, shape});
+	else
+		info = std::unique_ptr<MarcherInfo>(new MarcherInfo{ndim, shape});
+
 
 	Marcher *m;
 	if (factored)
@@ -186,7 +191,6 @@ static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 
     // install custom sigintterrupt handler (CTRL+C)
     auto handler_sigint = signal(SIGINT, signal_handler);
-    double error;
     bool success = true;
 
 	try
@@ -206,7 +210,6 @@ static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
     }
 
 	delete m;
-	delete info;
 
     // restore original signal handler
     signal(SIGINT, handler_sigint);
@@ -218,33 +221,55 @@ static PyObject* fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 	}
 
 	
+	PyObject *res;
 	if (output_sensitivities)
 	{
 		npy_intp *npy_shape = PyArray_DIMS(c);
 
-		npy_intp *orders_shape = new npy_intp[ndim + 1];
+		npy_intp orders_shape[ndim + 1];
 		orders_shape[0] = ndim; // one array for each dimension
 		for (int d=0; d < ndim; d++)
 			orders_shape[d+1] = npy_shape[d];
 
-		PyObject *sequence = PyArray_New(&PyArray_Type, ndim, npy_shape, NPY_LONG, NULL, ((SensitivityInfo *)info)->sequence, 0, NPY_ARRAY_CARRAY, NULL);
+		// the pointers of `info` must not be deallocated! otherwise the numpy array is broken
+		PyObject *sequence = PyArray_SimpleNewFromData(ndim, npy_shape, NPY_LONG, info->get_sequence());
 		if (!collection.validate(sequence, PyExc_MemoryError, "couldn't create sequence array."))
+		{
+			delete[] info->get_sequence();
+			delete[] info->get_order();
 			return NULL;
-		PyObject *orders = PyArray_New(&PyArray_Type, ndim+1, orders_shape, NPY_INT8, NULL, ((SensitivityInfo *)info)->orders, 0, NPY_ARRAY_CARRAY, NULL);
+		}
+		// set the array object to own the data pointer and therefore call delete[] when it is destroyed
+		PyArray_ENABLEFLAGS((PyArrayObject *)sequence, NPY_ARRAY_OWNDATA);
+
+		PyObject *orders = PyArray_SimpleNewFromData(ndim+1, orders_shape, NPY_INT8, info->get_order());
 		if (!collection.validate(orders, PyExc_MemoryError, "couldn't create sequence array."))
+		{
+			// info->get_sequence is already owned by the array, so don't delete it here
+			delete[] info->get_order();
 			return NULL;
-		return Py_BuildValue("OOO", (PyObject *)tau, sequence, orders);
+		}
+		PyArray_ENABLEFLAGS((PyArrayObject *)orders, NPY_ARRAY_OWNDATA);
+
+		// this will increase the ref counter of each object by 1!
+		res = Py_BuildValue("OOO", tau, sequence, orders);
 	}
 	else
-		return (PyObject *)tau;
+	{
+		Py_INCREF(tau); // need to increase by 1 here so that after collection.DECREF the count is still 1
+		res = (PyObject *)tau;
+	}
+
+	collection.DECREF();
+	return res;
 }
 
-static PyObject *fast_marching_wrapper(PyObject* self, PyObject* args, PyObject* kwargs)
+static PyObject *fast_marching_wrapper(PyObject *self, PyObject *args, PyObject *kwargs)
 {
 	return fast_marching_(args, kwargs, false);
 }
 
-static PyObject *factored_marching_wrapper(PyObject* self, PyObject* args, PyObject* kwargs)
+static PyObject *factored_marching_wrapper(PyObject *self, PyObject *args, PyObject *kwargs)
 {
 	return fast_marching_(args, kwargs, true);
 }
@@ -323,7 +348,7 @@ static struct PyModuleDef cfm_module = {
 
 PyMODINIT_FUNC PyInit_cfm(void)
 {
-	PyObject* m = PyModule_Create(&cfm_module);
+	PyObject *m = PyModule_Create(&cfm_module);
 	if (m == NULL)
 		return NULL;
 
