@@ -1,5 +1,5 @@
 // memory leak detection
-//#include "debugtests.h"
+// #include "debugtests.h"
 
 #include "factoredmarcher.hpp"
 #include <iostream>
@@ -13,9 +13,9 @@ using namespace std;
 int main()
 {
 	int ndim = 2;
-	unsigned long size = 11 * 6;
-	unsigned long* shape = new unsigned long[ndim] { 6, 11 };
-	double* dx = new double[ndim]{ 0.1, 0.1 };
+	usize size = 11 * 6;
+	usize *shape = new unsigned long[ndim] { 6, 11 };
+	double *dx = new double[ndim]{ 0.1, 0.1 };
 	int order = 2;
 
 	/*double c_[] = {
@@ -34,13 +34,13 @@ int main()
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     };
-	double* c = (double*)&c_;
-	unsigned long x0 = 33;
+	double *c = (double*)&c_;
+	usize x0 = 33;
 
 	auto info = MarcherInfo{ndim, shape};
 
-	double* tau = new double[size];
-	Marcher* m = new Marcher(c, info, dx, order);
+	double *tau = new double[size];
+	Marcher *m = new Marcher(c, info, dx, order);
 	m->solve(x0, tau);
 
 	int s = 0;
@@ -55,6 +55,8 @@ int main()
 		}
 	}
 
+	delete[] shape;
+	delete[] dx;
 	delete m;
 	delete[] tau;
 
