@@ -27,7 +27,6 @@
 #include "numpy/arrayobject.h"
 
 #include "factoredmarcher.hpp"
-#include <iostream>
 
 class InterruptExc : public std::exception
 {
