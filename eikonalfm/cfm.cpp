@@ -32,7 +32,6 @@ class InterruptExc : public std::exception
 {
 public:
     InterruptExc() {}
-    //~MyException() {}
 };
 
 void signal_handler(int code)
@@ -61,7 +60,7 @@ public:
             return false;
         }
 
-        objects.push_back(_PyObject_CAST(obj));
+        objects.push_back((PyObject *)obj);
         return true;
     }
 
@@ -77,11 +76,11 @@ public:
 template <class... Args>
 auto format(const char *format_str, Args&&... args) -> std::unique_ptr<char[]>
 {
-    int size_s = std::snprintf(nullptr, 0, format_str, args ...);
+    int size_s = std::snprintf(nullptr, 0, format_str, args...);
     if(size_s <= 0){ throw std::runtime_error("Error during formatting."); }
     auto size = static_cast<size_t>(size_s);
     std::unique_ptr<char[]> msg(new char[size]);
-    std::sprintf(msg.get(), format_str, args...);
+    std::snprintf(msg.get(), size_s, format_str, args...);
     return msg;
 }
 
@@ -143,7 +142,7 @@ static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 
 	double *dx = (double*)PyArray_DATA(dx_);
 	// TODO: maybe change this to 'ssize', since x_s_d is of type 'ssize' anyways
-	usize shape[ndim];
+	usize *shape = new usize[ndim];
 	// index version of x_s
     usize x_s = 0;
     usize *x_s_d = (usize *)PyArray_DATA(x_s_);
@@ -208,6 +207,7 @@ static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
         success = false;
     }
 
+	delete[] shape;
 	delete m;
 
     // restore original signal handler
@@ -225,7 +225,7 @@ static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 	{
 		npy_intp *npy_shape = PyArray_DIMS(c);
 
-		npy_intp orders_shape[ndim + 1];
+		npy_intp *orders_shape = new npy_intp[ndim + 1];
 		orders_shape[0] = ndim; // one array for each dimension
 		for (int d=0; d < ndim; d++)
 			orders_shape[d+1] = npy_shape[d];
@@ -252,6 +252,8 @@ static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 
 		// this will increase the ref counter of each object by 1!
 		res = Py_BuildValue("OOO", tau, sequence, orders);
+
+		delete[] orders_shape;
 	}
 	else
 	{
