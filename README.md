@@ -1,10 +1,10 @@
 # Eikonal Fast Marching
 
 eikonalfm is a Python (C++) extension which implements the Fast Marching method for the eikonal equation  
-<p align="center"><img src="https://latex.codecogs.com/svg.latex?\lvert\nabla\tau(x)\rvert^2=\frac{1}{c^2(x)}," title="\lvert\nabla\tau(x)\rvert^2=\frac{1}{c^2(x)}," /></p>  
+$$\lvert\nabla\tau(x)\rvert^2=\frac{1}{c^2(x)},$$  
 and the factored eikonal equation  
-<p align="center"><img src="https://latex.codecogs.com/svg.latex?\lvert(\tau_0\nabla\tau_1&plus;\tau_1\nabla\tau_0)(x)\rvert^2=\frac{1}{c^2(x)}," title="\lvert(\tau_0\nabla\tau_1+\tau_1\nabla\tau_0)(x)\rvert^2=\frac{1}{c^2(x)}," /></p>  
-where <img src="https://latex.codecogs.com/svg.latex?\inline&space;\tau_0(x)=\lvert&space;x-x_s\rvert." title="\tau_0(x)=\lvert x-x_s\rvert" />
+$$\lvert(\tau_0\nabla\tau_1 + \tau_1\nabla\tau_0)(x)\rvert^2=\frac{1}{c^2(x)},$$  
+where $\tau_0(x)=\lvert x-x_s\rvert$.
 
 ## References
 - J. Sethian. Fast marching methods. SIAM Review, 41(2):199-235, 1999. doi: 10.1137/S0036144598347059. URL https://doi.org/10.1137/S0036144598347059
