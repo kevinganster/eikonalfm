@@ -25,7 +25,7 @@ pkg_metadata = dict(
     license          = "MIT",
     keywords         = "Fast Marching method, factored Fast Marching method, eikonal equation, factored eikonal equation",
     python_requires = ">= 3.0",
-    install_requires = [ "setuptools < 60.0",
+    install_requires = [ "setuptools >= 65.5.1",
                          "numpy >= 1.7"],
     # "Development Status :: 4 - Beta",
     classifiers      = [ "License :: OSI Approved :: MIT License",
@@ -54,8 +54,7 @@ def parse_setuppy_commands():
                      '--maintainer', '--maintainer-email', '--url',
                      '--license', '--description', '--long-description',
                      '--platforms', '--classifiers', '--keywords',
-                     '--provides', '--requires', '--obsoletes',
-                     'egg_info', 'install_egg_info', 'rotate']
+                     '--provides', '--requires', '--obsoletes']
 
     for command in info_commands:
         if command in args:
