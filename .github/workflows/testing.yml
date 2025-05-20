@@ -1,0 +1,91 @@
+name: Build wheels
+
+on:
+  # only run on new releases/tags
+  release:
+    types: [published]
+  # Manual run
+  workflow_dispatch:
+
+# ensure only a single job is running
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build_wheels:
+    name: Build wheel for cp${{ matrix.python }}-${{ matrix.platform[1] }}
+    runs-on: ${{ matrix.platform[0] }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [36, 37, 38, 39, 310, 311, 312]
+        platform:
+          # Windows 32-bit
+          - [windows-latest, win32]
+          # Windows 64-bit
+          - [windows-latest, win_amd64]
+          # Linux 32-bit
+          - [ubuntu-latest, manylinux_i686]
+          # Linux 64-bit
+          - [ubuntu-latest, manylinux_x86_64]
+          # macOS on Intel 64-bit
+          - [macos-latest, macosx_x86_64]
+          # macOS on Apple M1 64-bit
+          - [macos-latest, macosx_arm64]
+
+        exclude:
+          # exclude python versions < 3.8 for macOS Apple Silicon
+          - platform: [macos-latest, macosx_arm64]
+            python: 36
+          - platform: [macos-latest, macosx_arm64]
+            python: 37
+        
+        # add arch configurations to macosx entries
+        include:
+          - platform: [macos-latest, macosx_x86_64]
+            arch: x86_64
+          - platform: [macos-latest, macosx_arm64]
+            arch: arm64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      # setup MSVC (Windows)
+      - name: Set up MSVC x86
+        if: matrix.platform[1] == 'win32'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+      - name: Set up MSVC x64
+        if: matrix.platform[1] == 'win_amd64'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      # https://cibuildwheel.readthedocs.io/en/stable/
+      # https://github.com/pypa/cibuildwheel
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.23.3
+        env:
+          CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform[1] }}
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_MANYLINUX_I686_IMAGE: manylinux2014
+          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
+          CIBW_TEST_SKIP: "*-macosx_arm64"
+
+          # Include latest Python beta
+          CIBW_PRERELEASE_PYTHONS: True
+
+          CIBW_TEST_COMMAND: python -c "import eikonalfm"
+        with:
+          output-dir: wheelhouse
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./wheelhouse/*.whl
