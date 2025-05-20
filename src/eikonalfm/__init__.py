@@ -10,7 +10,6 @@ and the factored eikonal equation
 See https://github.com/kevinganster/eikonalfm for more information
 """
 __title__ = "eikonalfm"
-__version__ = "0.9.7"
 __author__ = "Kevin Ganster"
 __email__ = "kevinganster@gmail.com"
 

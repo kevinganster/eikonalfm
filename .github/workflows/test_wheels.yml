@@ -1,7 +1,10 @@
-name: Test Build wheels
+name: Build wheels
 
 on:
-  # Only on manual run
+  # only run on new releases/tags
+  release:
+    types: [published]
+  # Manual run
   workflow_dispatch:
 
 # ensure only a single job is running
@@ -36,7 +39,7 @@ jobs:
           - [macos-latest, macosx_arm64]
 
         exclude:
-          # exclude python versions < 3.9 for macOS Apple Silicon
+          # exclude python versions < 3.8 for macOS Apple Silicon
           - platform: [macos-latest, macosx_arm64]
             python: 36
           - platform: [macos-latest, macosx_arm64]
@@ -118,3 +121,20 @@ jobs:
         with:
           # name: sdist
           path: ./dist/*.tar.gz
+
+  upload_pypi:
+    needs: ["build_wheels", "build_sdist"]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4.1.7
+      with:
+        # unpacks default artifact into dist/
+        name: artifact
+        path: dist
+
+    - uses: pypa/gh-action-pypi-publish@v1.5.0
+      with:
+        user: __token__
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/

@@ -1,0 +1,4 @@
+CompileFlags:
+  Add:
+    - --include-directory=/home/kevin/.pyenv/versions/3.10.13/include/python3.10/
+    - --include-directory=/home/kevin/git/eikonalfm/env/lib/python3.12/site-packages/numpy/_core/include/

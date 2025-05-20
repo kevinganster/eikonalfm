@@ -39,7 +39,7 @@ jobs:
           - [macos-latest, macosx_arm64]
 
         exclude:
-          # exclude python versions < 3.9 for macOS Apple Silicon
+          # exclude python versions < 3.8 for macOS Apple Silicon
           - platform: [macos-latest, macosx_arm64]
             python: 36
           - platform: [macos-latest, macosx_arm64]
@@ -137,5 +137,3 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
-        # repository_url: https://test.pypi.org/legacy/
-        # password: ${{ secrets.TEST_PYPI_API_TOKEN }}
