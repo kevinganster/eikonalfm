@@ -1,6 +1,46 @@
 [build-system]
 requires = [
-    "setuptools >= 65.5.1",
-    "numpy >= 1.7"
+    "setuptools>=65.5.1",
+    "numpy>=1.7"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "eikonalfm"
+version = "0.9.8"
+authors = [
+    { name="Kevin Ganster", email="kevinganster@gmail.com"}
+]
+description = "Solving the (factored) eikonal equation with the Fast Marching method"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [ "numpy>=1.7" ]
+# new-style license entries ("SPDX expression") need newer setuptools 77.0/Python >= 3.9
+dynamic = [ "license" ]
+keywords = [
+    "Fast Marching method",
+    "factored Fast Marching method",
+    "eikonal equation",
+    "factored eikonal equation"
+]
+classifiers = [
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3"
+]
+
+[project.urls]
+Homepage = "https://github.com/kevinganster/eikonalfm"
+Issues = "https://github.com/kevinganster/eikonalfm/issues"
+
+# [tool.setuptools]
+# [[tool.setuptools.ext-modules]]
+# name = "eikonalfm.cfm"
+# sources = [
+#     "eikonalfm/cfm.cpp",
+#     "eikonalfm/marcher.cpp",
+#     "eikonalfm/factoredmarcher.cpp",
+#     "eikonalfm/heap.cpp"
+# ]
+# ...

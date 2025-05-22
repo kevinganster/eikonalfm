@@ -150,7 +150,7 @@ static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
     usize tmp = 1;
 	for (int d = ndim - 1; d >= 0; d--)
 	{
-		shape[d] = PyArray_DIM(c, d);
+		shape[d] = (usize)PyArray_DIM(c, d);
 
 		if (x_s_d[d] >= shape[d])
 		{
