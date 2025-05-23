@@ -1,0 +1,39 @@
+name: Distribute wheels
+
+on:
+  # only run on new releases/tags
+  release:
+    types: [published]
+  # Manual run
+  workflow_dispatch:
+
+# ensure only a single job is running
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  wheels:
+    uses: ./.github/workflows/wheels.yml
+
+  upload_pypi:
+    needs: ["wheels"]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        # unpack all artifacts into dist/
+        path: dist
+        merge-multiple: true
+    
+    - name: Display files
+      run: ls -R dist/
+
+    - uses: pypa/gh-action-pypi-publish@v1.5.0
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
