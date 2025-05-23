@@ -57,9 +57,11 @@ jobs:
             archs: auto,universal2
 
         exclude:
-          # exclude python versions < 3.8 for macOS Apple Silicon
+          # exclude python versions < 3.9 for macOS Apple Silicon
           - os: macOS-arm
             python: 37
+          - os: macOS-arm
+            python: 38
 
     steps:
       - uses: actions/checkout@v4
