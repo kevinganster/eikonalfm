@@ -8,6 +8,11 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+docs/_*/
+
+# pytest
+.pytest_cache/
+.mypy_cache/
 
 # venv folder
 /env/
@@ -16,13 +21,8 @@ build/
 /*.egg-info
 /*.egg
 
-# eclipse/PyDev
-.project
-.pydevproject
-.settings/
-
 # Visual Studio Code
-.vscode/
+# .vscode/
 
 #CLion
 .idea

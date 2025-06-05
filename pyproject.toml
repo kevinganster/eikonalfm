@@ -30,9 +30,23 @@ classifiers = [
     "Programming Language :: Python :: 3"
 ]
 
+# these can be installed via `pip install eikonalfm[extra]`
+[project.optional-dependencies]
+test = [
+    "pytest"
+]
+doc = [
+    "sphinx >= 2.1",
+    "myst-nb",
+    "sphinx_rtd_theme",
+    "sphinx-autoapi",
+]
+
 [project.urls]
-Homepage = "https://github.com/kevinganster/eikonalfm"
-Issues = "https://github.com/kevinganster/eikonalfm/issues"
+homepage = "https://github.com/kevinganster/eikonalfm"
+source = "https://github.com/kevinganster/eikonalfm"
+# documentation = "https://github.com/TODO"
+issues = "https://github.com/kevinganster/eikonalfm/issues"
 
 # [tool.setuptools]
 # [[tool.setuptools.ext-modules]]
@@ -44,3 +58,15 @@ Issues = "https://github.com/kevinganster/eikonalfm/issues"
 #     "eikonalfm/heap.cpp"
 # ]
 # ...
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "--import-mode=importlib",
+]
+testpaths = [
+    "tests"
+]
+filterwarnings = [
+    "error",
+]

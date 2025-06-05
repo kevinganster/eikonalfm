@@ -1,9 +1,17 @@
 # Eikonal Fast Marching
 
-eikonalfm is a Python (C++) extension which implements the Fast Marching method for the eikonal equation  
-$$\lvert\nabla\tau(x)\rvert^2=\frac{1}{c^2(x)},$$  
-and the factored eikonal equation  
-$$\lvert(\tau_0\nabla\tau_1 + \tau_1\nabla\tau_0)(x)\rvert^2=\frac{1}{c^2(x)},$$  
+eikonalfm is a Python (C++) extension which implements the Fast Marching method for the eikonal equation
+
+$$
+    \lvert\nabla\tau(x)\rvert^2=\frac{1}{c^2(x)},
+$$
+
+and the factored eikonal equation
+
+$$
+    \lvert(\tau_0\nabla\tau_1 + \tau_1\nabla\tau_0)(x)\rvert^2=\frac{1}{c^2(x)},
+$$
+
 where $\tau_0(x)=\lvert x-x_s\rvert$.
 
 ## References
