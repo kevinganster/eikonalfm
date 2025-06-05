@@ -58,6 +58,7 @@ public:
 
 	~SensitivityInfo() override
 	{
+        // the pointers are deleted in cfm.cpp
 		// delete[] sequence;
 		// delete[] orders;
 	}

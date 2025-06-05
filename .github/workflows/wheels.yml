@@ -1,15 +1,14 @@
 name: Build wheels
 
 on:
-  # only run on new releases/tags
-  release:
-    types: [published]
+  # reusable workflows: https://docs.github.com/en/actions/sharing-automations/reusing-workflows
+  workflow_call:
   # Manual run
   workflow_dispatch:
 
 # ensure only a single job is running
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: wheels-${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 permissions:
@@ -57,9 +56,11 @@ jobs:
             archs: auto,universal2
 
         exclude:
-          # exclude python versions < 3.8 for macOS Apple Silicon
+          # exclude python versions < 3.9 for macOS Apple Silicon
           - os: macOS-arm
             python: 37
+          - os: macOS-arm
+            python: 38
 
     steps:
       - uses: actions/checkout@v4
@@ -118,22 +119,3 @@ jobs:
         with:
           name: sdist
           path: ./dist/*.tar.gz
-
-  upload_pypi:
-    needs: ["build_wheels", "build_sdist"]
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/download-artifact@v4
-      with:
-        # unpack all artifacts into dist/
-        path: dist
-        merge-multiple: true
-    
-    - name: Display files
-      run: ls -R dist/
-
-    - uses: pypa/gh-action-pypi-publish@v1.5.0
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
