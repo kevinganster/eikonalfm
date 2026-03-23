@@ -193,7 +193,9 @@ static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 
 	try
 	{
+		Py_BEGIN_ALLOW_THREADS;
 		m->solve(x_s, (double *)PyArray_DATA(tau));
+		Py_END_ALLOW_THREADS;
 	}
 	catch (const InterruptExc& ex)
     {
@@ -224,7 +226,6 @@ static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
         return NULL;
 	}
 
-	
 	PyObject *res;
 	if (output_sensitivities)
 	{
@@ -280,10 +281,10 @@ static PyObject *factored_marching_wrapper(PyObject *self, PyObject *args, PyObj
 	return fast_marching_(args, kwargs, true);
 }
 
-// Each entry in this array is a PyMethodDef structure containing 
+// Each entry in this array is a PyMethodDef structure containing
 // 1) the Python name,
 // 2) the C - function that implements the function,
-// 3) flags indicating whether or not keywords are accepted for this function, and 
+// 3) flags indicating whether or not keywords are accepted for this function, and
 // 4) The docstring for the function.
 static PyMethodDef fm_methods[] = {
 	{"fast_marching", (PyCFunction)fast_marching_wrapper, METH_VARARGS | METH_KEYWORDS,
