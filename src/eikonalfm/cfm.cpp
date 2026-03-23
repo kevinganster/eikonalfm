@@ -215,6 +215,11 @@ static PyObject *fast_marching_(PyObject *args, PyObject *kwargs, const bool fac
 
 	if (!success)
 	{
+		if (output_sensitivities)
+		{
+			delete[] info->get_sequence();
+			delete[] info->get_order();
+		}
         collection.DECREF();
         return NULL;
 	}
