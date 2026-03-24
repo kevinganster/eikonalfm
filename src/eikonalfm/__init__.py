@@ -51,7 +51,7 @@ def distance(shape, dx, x_s, indexing: Literal["xy", "ij"] = "xy"):
     for shape_i, dx_i in zip(shape, dx):
         x.append(np.linspace(0, shape_i*dx_i, shape_i, endpoint=False))
     mesh = np.array(np.meshgrid(*x, indexing=indexing))
-    
+
     # get real coordinates of x_s
     x_s = np.array(x_s) * np.array(dx)
     return np.linalg.norm((mesh.T - x_s).T, ord=2, axis=0)
