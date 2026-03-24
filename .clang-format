@@ -1,0 +1,30 @@
+# https://clangd.llvm.org/config
+# https://releases.llvm.org/21.1.0/tools/clang/docs/ClangFormatStyleOptions.html
+# https://clang-format-configurator.site/
+BasedOnStyle: llvm
+Language: Cpp
+
+AccessModifierOffset: -4 # shift private, public, protected to the left
+IndentWidth: 4
+ContinuationIndentWidth: 4  # control how far to indent continued lines
+
+AlignAfterOpenBracket: BlockIndent
+AlignTrailingComments:
+  Kind: Never
+AllowShortEnumsOnASingleLine: false
+# AlwaysBreakAfterConstructorInitializers: Yes
+# BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTemplateCloser: true # add linebreak before > if template is multiline
+# BreakConstructorInitializers: BeforeColon # BeforeColon is already default
+BreakTemplateDeclarations: Yes
+ColumnLimit: 120
+# CommentPragmas: '^'
+DerivePointerAlignment: true
+IndentRequiresClause: false # indent the 'requires' keyword
+MaxEmptyLinesToKeep: 2
+# PenaltyBreakBeforeFirstCallParameter: 100000 # prevent breaks directly after a function call (default: 19)
+PenaltyBreakTemplateDeclaration: 100000 # penalty for breaking after template declaration.
+PointerAlignment: Left
+SpaceAfterTemplateKeyword: false
+SpaceBeforeCtorInitializerColon: false
+SpaceBeforeInheritanceColon: false

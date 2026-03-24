@@ -23,6 +23,7 @@ docs/_*/
 
 # Visual Studio Code
 # .vscode/
+.clangd
 
 #CLion
 .idea

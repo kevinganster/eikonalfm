@@ -1,0 +1,13 @@
+Checks:
+  - '-*'
+  - 'modernize-use-override'
+  - 'modernize-use-trailing-return-type'
+  - 'readability-identifier-naming'
+
+CheckOptions:
+  - key: modernize-use-trailing-return-type.TransformLambdas
+    value: none
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
