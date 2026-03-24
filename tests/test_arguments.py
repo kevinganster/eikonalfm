@@ -56,24 +56,24 @@ class TestSource:
             func(c, None, dx, 1)
         with pytest.raises(ValueError):
             func(c, 1.0, dx, 2)
-    
+
     def test_dtype(self, func, c, dx):
         with pytest.raises(ValueError):
             func(c, ("a", "b"), dx, 1)
         with pytest.raises(ValueError):
             func(c, np.array([1.5, 2]), dx, 2)
-    
+
     def test_dim(self, func, c, dx):
         with pytest.raises(ValueError):
             func(c, [(0, 0), (1, 1)], dx, 1)
-    
+
     def test_shape(self, func, c, dx):
         # wrong shape
         with pytest.raises(ValueError):
             func(c, (0, ), dx, 1)
         with pytest.raises(ValueError):
             func(c, (0, 0, 0), dx, 1)
-        
+
         # outside shape
         with pytest.raises(ValueError):
             func(c, (-1, 1), dx, 1)
@@ -91,15 +91,15 @@ class TestDx:
             func(c, x_s, None, 1)
         with pytest.raises(ValueError):
             func(c, x_s, 1.3, 2)
-    
+
     def test_dtype(self, func, c, x_s):
         with pytest.raises(ValueError):
             func(c, x_s, ("a", "b"), 1)
-    
+
     def test_dim(self, func, c, x_s):
         with pytest.raises(ValueError):
             func(c, x_s, [(0.1, 0.1), (0.2, 0.2)], 1)
-    
+
     def test_shape(self, func, c, x_s):
         # wrong shape
         with pytest.raises(ValueError):

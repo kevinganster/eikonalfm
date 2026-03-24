@@ -11,8 +11,8 @@ def test_dist():
     d = eikonalfm.distance(shape, dx, x_s, indexing="ij")
 
     assert isinstance(d, np.ndarray)
+    # check indexing
     assert np.allclose(eikonalfm.distance(shape, dx, x_s, indexing="xy"), d.T)
-
     # check values
     for i in itertools.product(*(range(n) for n in shape)):
         assert np.isclose(np.linalg.norm((i - x_s) * dx), d[i])

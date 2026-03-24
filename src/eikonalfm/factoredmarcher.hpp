@@ -1,18 +1,20 @@
 #pragma once
 
 #include "marcher.hpp"
+#include <vector>
 
-class FactoredMarcher : public Marcher
-{
+class FactoredMarcher: public Marcher {
 private:
-	const ssize* to_vector(usize i);
-	void initialize(double* const tau0, double* const tau1, const usize x0, const ssize* const x0_v);
+    auto to_vector(usize i) -> std::vector<usize>;
+    void initialize(double* const tau0, double* const tau1, const usize x_s, std::vector<usize> const& x_s_v);
 
 protected:
-	double solve_quadratic(const double* const tau0, const double* const tau1, const ssize* const x0, const usize x);
+    auto
+    solve_quadratic(double const* const tau0, double const* const tau1, std::vector<usize> const& x_s_v, usize const x)
+        -> double;
 
 public:
-	FactoredMarcher(const double* const c, MarcherInfo& info, const double* const dx, const int order);
+    FactoredMarcher(double const* const c, MarcherInfo& info, double const* const dx, int const order);
 
-	void solve(const usize x0, double* const tau1);
+    void solve(usize const x_s, double* const tau1) override;
 };
