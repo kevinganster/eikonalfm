@@ -2,10 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.9 (WIP)
+
+- Release the Global Interpreter Lock (GIL) during the main `marcher.solve()` method.
+- Fixed a small memory leak when `marcher.solve()` did not succeed and `output_sensitivities == True`.
+- Fixed ARM builds: `char` is unsigned there, meaning the marcher interpreted the direction `-1` as `255`, leading to completely wrong results and often runtime errors.
+- Removed wheels for Python 3.7, and added Python 3.14
+
 ## v0.9.8 (22/05/2025)
 
 - Updated legacy setup.py to the pyproject.toml build system using setuptools.
-- Adjusted workflows to work with the new build system and also build arm versions of the wheels.
+- Adjusted workflows to work with the new build system and also build ARM versions of the wheels.
 - With this, Python 3.6 is no longer supported because of the changes in setuptools. Instead, we can now build wheels for Python 3.12 and 3.13.
 - Removed some compiler warnings.
 

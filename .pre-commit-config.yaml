@@ -13,3 +13,13 @@ repos:
     hooks:
       - id: clang-format
         files: ^src/
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.15.7
+    hooks:
+      # Run the linter.
+      - id: ruff-check
+        types_or: [ python, pyi ]
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
+        types_or: [ python, pyi ]

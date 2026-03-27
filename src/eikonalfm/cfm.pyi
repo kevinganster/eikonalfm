@@ -1,14 +1,15 @@
+import sys
 from typing import TYPE_CHECKING, Any, Literal, Sequence, Tuple, Union, overload
 from numpy.typing import ArrayLike, NDArray
 
 if TYPE_CHECKING or sys.version_info >= (3, 9):
     import numpy as np
+
     IntArray = NDArray[np.int_]
     FloatArray = NDArray[np.floating[Any]]
 else:
     IntArray = NDArray
     FloatArray = NDArray
-
 
 @overload
 def fast_marching(
@@ -16,7 +17,7 @@ def fast_marching(
     x_s: Union[Sequence[int], IntArray],
     dx: Union[Sequence[float], FloatArray],
     order: Literal[1, 2],
-    output_sensitivities: Literal[False] = False
+    output_sensitivities: Literal[False] = False,
 ) -> FloatArray:
     r"""
     Calculates the fast marching solution to the eikonal equation.
@@ -46,13 +47,14 @@ def fast_marching(
             Only returned when `output_sensitivities` is set to `True`. The finite difference orders for each dimension used at each gridpoint.
     """
     ...
+
 @overload
 def fast_marching(
     c: ArrayLike,
     x_s: Union[Sequence[int], IntArray],
     dx: Union[Sequence[float], FloatArray],
     order: Literal[1, 2],
-    output_sensitivities: Literal[True]
+    output_sensitivities: Literal[True],
 ) -> Tuple[FloatArray, IntArray, IntArray]:
     """
     Calculates the fast marching solution to the eikonal equation.
@@ -89,7 +91,7 @@ def factored_fast_marching(
     x_s: Union[Sequence[int], IntArray],
     dx: Union[Sequence[float], FloatArray],
     order: Literal[1, 2],
-    output_sensitivities: Literal[False] = False
+    output_sensitivities: Literal[False] = False,
 ) -> FloatArray:
     """
     Calculates the fast marching solution to the factored eikonal equation.
@@ -125,7 +127,9 @@ def factored_fast_marching(
     c: ArrayLike,
     x_s: Union[Sequence[int], IntArray],
     dx: Union[Sequence[float], FloatArray],
-    order: Literal[1, 2], output_sensitivities: Literal[True]) -> Tuple[FloatArray, IntArray, IntArray]:
+    order: Literal[1, 2],
+    output_sensitivities: Literal[True],
+) -> Tuple[FloatArray, IntArray, IntArray]:
     """
     Calculates the fast marching solution to the eikonal equation.
 

@@ -7,9 +7,11 @@ import eikonalfm
 def c():
     return np.ones((10, 10))
 
+
 @pytest.fixture(scope="module")
 def x_s():
     return 0, 0
+
 
 @pytest.fixture(scope="module")
 def dx():
@@ -28,6 +30,7 @@ class TestOrder:
         with pytest.raises(ValueError):
             func(c, x_s, dx, 3)
 
+
 @pytest.mark.parametrize("func", [eikonalfm.fast_marching, eikonalfm.factored_fast_marching])
 class TestVelocity:
     def test_no_array(self, func, x_s, dx):
@@ -44,10 +47,11 @@ class TestVelocity:
     def test_dim(self, func, x_s, dx):
         with pytest.raises(ValueError):
             # 1D array, but 2D x_s/dx
-            func(np.ones((10, )), x_s, dx, 1)
+            func(np.ones((10,)), x_s, dx, 1)
         with pytest.raises(ValueError):
             # 4D array, but 2D x_s/dx
             func(np.ones((10, 10, 10, 10)), x_s, dx, 2)
+
 
 @pytest.mark.parametrize("func", [eikonalfm.fast_marching, eikonalfm.factored_fast_marching])
 class TestSource:
@@ -70,7 +74,7 @@ class TestSource:
     def test_shape(self, func, c, dx):
         # wrong shape
         with pytest.raises(ValueError):
-            func(c, (0, ), dx, 1)
+            func(c, (0,), dx, 1)
         with pytest.raises(ValueError):
             func(c, (0, 0, 0), dx, 1)
 
@@ -83,6 +87,7 @@ class TestSource:
             func(c, (c.shape[0] + 2, 5), dx, 1)
         with pytest.raises(ValueError):
             func(c, (5, c.shape[1] + 2), dx, 1)
+
 
 @pytest.mark.parametrize("func", [eikonalfm.fast_marching, eikonalfm.factored_fast_marching])
 class TestDx:
@@ -103,7 +108,7 @@ class TestDx:
     def test_shape(self, func, c, x_s):
         # wrong shape
         with pytest.raises(ValueError):
-            func(c, x_s, (0.1, ), 1)
+            func(c, x_s, (0.1,), 1)
         with pytest.raises(ValueError):
             func(c, x_s, (0.1, 0.1, 0.1), 1)
 

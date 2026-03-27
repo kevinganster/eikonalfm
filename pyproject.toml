@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "eikonalfm"
-version = "0.9.8"
+version = "0.9.9"
 authors = [
     { name="Kevin Ganster", email="kevinganster@gmail.com"}
 ]
@@ -70,3 +70,10 @@ testpaths = [
 filterwarnings = [
     "error",
 ]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# Ignore unused imports (`F401`).
+ignore = ["F401"]

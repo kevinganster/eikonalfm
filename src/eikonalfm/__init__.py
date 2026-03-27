@@ -12,6 +12,7 @@ and the factored eikonal equation
 
 See https://github.com/kevinganster/eikonalfm for more information
 """
+
 __title__ = "eikonalfm"
 __author__ = "Kevin Ganster"
 __email__ = "kevinganster@gmail.com"
@@ -46,10 +47,10 @@ def distance(shape, dx, x_s, indexing: Literal["xy", "ij"] = "xy"):
             euclidian distance field :math:`|x - x_s|`.
     """
     # TODO: maybe swap dx and x_s arguments, to match the order in fast_marching and factored_fast_marching
-    assert(len(shape) == len(dx) == len(x_s))
+    assert len(shape) == len(dx) == len(x_s)
     x = []
     for shape_i, dx_i in zip(shape, dx):
-        x.append(np.linspace(0, shape_i*dx_i, shape_i, endpoint=False))
+        x.append(np.linspace(0, shape_i * dx_i, shape_i, endpoint=False))
     mesh = np.array(np.meshgrid(*x, indexing=indexing))
 
     # get real coordinates of x_s
