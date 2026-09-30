@@ -2,7 +2,7 @@
 
 <!--next-version-placeholder-->
 
-## v0.9.9 (WIP)
+## v0.9.9 (01/10/2026)
 
 - Release the Global Interpreter Lock (GIL) during the main `marcher.solve()` method.
 - Fixed a small memory leak when `marcher.solve()` did not succeed and `output_sensitivities == True`.

@@ -19,8 +19,10 @@ __email__ = "kevinganster@gmail.com"
 
 
 from typing import Literal
+
 import numpy as np
-from .cfm import fast_marching, factored_fast_marching
+
+from .cfm import factored_fast_marching, fast_marching
 
 
 def distance(shape, dx, x_s, indexing: Literal["xy", "ij"] = "xy"):
@@ -58,4 +60,4 @@ def distance(shape, dx, x_s, indexing: Literal["xy", "ij"] = "xy"):
     return np.linalg.norm((mesh.T - x_s).T, ord=2, axis=0)
 
 
-__all__ = ["distance", "fast_marching", "factored_fast_marching"]
+__all__ = ["distance", "factored_fast_marching", "fast_marching"]

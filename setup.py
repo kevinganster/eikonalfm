@@ -1,7 +1,7 @@
 import sys
-from setuptools import setup, Extension
-import numpy as np
 
+import numpy as np
+from setuptools import Extension, setup
 
 ext_args = {}
 if sys.platform == "darwin":

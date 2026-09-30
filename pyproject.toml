@@ -33,7 +33,8 @@ classifiers = [
 # these can be installed via `pip install eikonalfm[extra]`
 [project.optional-dependencies]
 test = [
-    "pytest"
+    "pytest",
+    "typing_extensions"
 ]
 doc = [
     "sphinx >= 2.1",
@@ -75,5 +76,8 @@ filterwarnings = [
 line-length = 120
 
 [tool.ruff.lint]
-# Ignore unused imports (`F401`).
-ignore = ["F401"]
+ignore = ["F401"] # Ignore unused imports (`F401`).
+extend-select = ["I"]  # I = isort rules
+
+[tool.ruff.lint.isort]
+known-first-party = ["python"]

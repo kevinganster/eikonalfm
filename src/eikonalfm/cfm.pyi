@@ -1,12 +1,16 @@
 import sys
-from typing import TYPE_CHECKING, Any, Literal, Sequence, Tuple, Union, overload
+from typing import Any, Literal, Sequence, overload
+
 from numpy.typing import ArrayLike, NDArray
 
-if TYPE_CHECKING or sys.version_info >= (3, 9):
+# if we drop Python < 3.10, we can simply use `from typing import TypeAlias`.
+from typing_extensions import TypeAlias
+
+if sys.version_info >= (3, 9):
     import numpy as np
 
-    IntArray = NDArray[np.int_]
-    FloatArray = NDArray[np.floating[Any]]
+    IntArray: TypeAlias = NDArray[np.int_]
+    FloatArray: TypeAlias = NDArray[np.floating[Any]]
 else:
     IntArray = NDArray
     FloatArray = NDArray
@@ -14,8 +18,8 @@ else:
 @overload
 def fast_marching(
     c: ArrayLike,
-    x_s: Union[Sequence[int], IntArray],
-    dx: Union[Sequence[float], FloatArray],
+    x_s: Sequence[int] | IntArray,
+    dx: Sequence[float] | FloatArray,
     order: Literal[1, 2],
     output_sensitivities: Literal[False] = False,
 ) -> FloatArray:
@@ -41,21 +45,16 @@ def fast_marching(
     ----------
         tau : ndarray
             numerical solution tau for the eikonal equation.
-        sequence : ndarray, optional
-            Only returned when `output_sensitivities` is set to `True`. The sequence in which each gridpoint was set to known.
-        orders : ndarray, optional
-            Only returned when `output_sensitivities` is set to `True`. The finite difference orders for each dimension used at each gridpoint.
     """
-    ...
 
 @overload
 def fast_marching(
     c: ArrayLike,
-    x_s: Union[Sequence[int], IntArray],
-    dx: Union[Sequence[float], FloatArray],
+    x_s: Sequence[int] | IntArray,
+    dx: Sequence[float] | FloatArray,
     order: Literal[1, 2],
     output_sensitivities: Literal[True],
-) -> Tuple[FloatArray, IntArray, IntArray]:
+) -> tuple[FloatArray, IntArray, IntArray]:
     """
     Calculates the fast marching solution to the eikonal equation.
 
@@ -83,13 +82,12 @@ def fast_marching(
         orders : ndarray
             The finite difference orders for each dimension used at each gridpoint.
     """
-    ...
 
 @overload
 def factored_fast_marching(
     c: ArrayLike,
-    x_s: Union[Sequence[int], IntArray],
-    dx: Union[Sequence[float], FloatArray],
+    x_s: Sequence[int] | IntArray,
+    dx: Sequence[float] | FloatArray,
     order: Literal[1, 2],
     output_sensitivities: Literal[False] = False,
 ) -> FloatArray:
@@ -115,23 +113,18 @@ def factored_fast_marching(
     ----------
         tau1 : ndarray
             numerical solution tau1 for the factored eikonal equation.
-        sequence : ndarray, optional
-            Only returned when `output_sensitivities` is set to `True`. The sequence in which each gridpoint was set to known.
-        orders : ndarray, optional
-            Only returned when `output_sensitivities` is set to `True`. The finite difference orders for each dimension used at each gridpoint.
     """
-    ...
 
 @overload
 def factored_fast_marching(
     c: ArrayLike,
-    x_s: Union[Sequence[int], IntArray],
-    dx: Union[Sequence[float], FloatArray],
+    x_s: Sequence[int] | IntArray,
+    dx: Sequence[float] | FloatArray,
     order: Literal[1, 2],
     output_sensitivities: Literal[True],
-) -> Tuple[FloatArray, IntArray, IntArray]:
+) -> tuple[FloatArray, IntArray, IntArray]:
     """
-    Calculates the fast marching solution to the eikonal equation.
+    Calculates the fast marching solution to the factored eikonal equation.
 
     Parameters
     ----------
@@ -157,4 +150,3 @@ def factored_fast_marching(
         orders : ndarray
             The finite difference orders for each dimension used at each gridpoint.
     """
-    ...

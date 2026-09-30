@@ -81,8 +81,8 @@ jobs:
           CIBW_BUILD: 'cp${{ matrix.python }}-*'
           CIBW_PLATFORM: ${{ matrix.platform }}
           CIBW_ARCHS: ${{ matrix.archs }}
-        #   CIBW_SKIP: '*-musllinux_*'
-          CIBW_TEST_SKIP: "*-macos-arm"
+          # CIBW_SKIP: '*-musllinux_*'
+          # CIBW_TEST_SKIP: "*-macosx-arm*"
 
           CIBW_ENABLE: cpython-prerelease
           CIBW_TEST_COMMAND: python -c "import numpy as np; import eikonalfm; eikonalfm.factored_fast_marching(np.ones((10, 10)), (0, 0), (0.1, 0.1), 2)"

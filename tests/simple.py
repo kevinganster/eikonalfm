@@ -1,7 +1,7 @@
-import numpy as np
-import eikonalfm
 import matplotlib.pyplot as plt
+import numpy as np
 
+import eikonalfm
 
 x, dx = np.linspace(-5, 5, 1001, retstep=True)
 y, dy = np.linspace(0, 5, 501, retstep=True)
